@@ -5,6 +5,7 @@ const { register, login } = require('../controllers/authController');
 const { validate, registerSchema, loginSchema } = require('../validators/authValidator');
 const { createCategory, getAllCategories, getCategoryById, updateCategory, deleteCategory } = require('../controllers/categoryController');
 const { createTicket, getAllTickets, getMyTickets, getTicketById, updateTicket, addCommentToTicket } = require('../controllers/ticketController');
+const { getAllUsers } = require('../controllers/userController');
 
 // Rotas de Autenticação
 router.post('/auth/register', validate(registerSchema), register);
@@ -55,6 +56,11 @@ router.route('/tickets/:id')
 
 router.route('/tickets/:id/comments')
   .post(authenticateToken, addCommentToTicket);
+
+// Rotas de Usuários
+router.route('/users')
+  .get(authenticateToken, authorizeRole(['admin']), getAllUsers);
+
 
 
 module.exports = router;

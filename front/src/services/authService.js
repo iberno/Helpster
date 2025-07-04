@@ -1,12 +1,12 @@
-const API_URL = 'http://localhost:3000/api'; // Altere se sua API estiver em outra porta/URL
+const API_URL = 'http://localhost:3000/api'; // URL da API do Helpster
 
-const register = async (email, password, role) => {
+const register = async (name, email, password, role) => {
   const response = await fetch(`${API_URL}/auth/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ email, password, role }),
+    body: JSON.stringify({ name, email, password, role }),
   });
   const data = await response.json();
   if (!response.ok) {
@@ -77,12 +77,18 @@ const getManagerData = async (token) => {
 
 // Mocked user and role management functions
 const getUsers = async (token) => {
-  // Em um app real, isso viria do backend
-  return Promise.resolve([
-    { id: 1, email: 'admin@example.com', role: 'admin' },
-    { id: 2, email: 'manager@example.com', role: 'manager' },
-    { id: 3, email: 'user@example.com', role: 'user' },
-  ]);
+  const response = await fetch(`${API_URL}/users`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || 'Falha ao buscar usuários');
+  }
+  return data;
 };
 
 const createUser = async (token, userData) => {
@@ -110,7 +116,6 @@ export default {
   getAdminData,
   getManagerData,
   getUsers,
-  createUser,
   getRoles,
   createRole,
 };

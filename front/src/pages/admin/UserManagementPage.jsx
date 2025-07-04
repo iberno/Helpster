@@ -85,7 +85,7 @@ const UserManagementPage = () => {
         <ul className="space-y-2">
           {users.map((user) => (
             <li key={user.id} className="flex justify-between items-center p-2 border-b">
-              <span>{user.email}</span>
+              <span>{user.name} ({user.email})</span>
               <span className="px-2 py-1 text-sm font-semibold bg-gray-200 text-gray-700 rounded-full">{user.role}</span>
             </li>
           ))}
