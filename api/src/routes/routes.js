@@ -61,6 +61,22 @@ router.route('/tickets/:id/comments')
 router.route('/users')
   .get(authenticateToken, authorizeRole(['admin']), getAllUsers);
 
+// Rotas de Permissões
+router.route('/permissions')
+  .get(authenticateToken, authorizeRole(['admin']), getAllPermissions);
+
+// Rotas de Perfis (Roles)
+router.route('/roles')
+  .post(authenticateToken, authorizeRole(['admin']), createRole)
+  .get(authenticateToken, authorizeRole(['admin']), getAllRoles);
+
+router.route('/roles/:id')
+  .delete(authenticateToken, authorizeRole(['admin']), deleteRole);
+
+router.route('/roles/:id/permissions')
+  .put(authenticateToken, authorizeRole(['admin']), updateRolePermissions);
+
+
 
 
 module.exports = router;
