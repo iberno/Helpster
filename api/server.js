@@ -5,7 +5,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 
 const { connectDB } = require('./src/config/database');
-const { createUserTable } = require('./src/models/User');
+const { setupDatabase } = require('./src/models/databaseSetup');
 const routes = require('./src/routes/routes');
 
 // Conectar ao banco de dados e criar tabelas

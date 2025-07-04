@@ -3,6 +3,8 @@ const router = express.Router();
 const { authenticateToken, authorizeRole } = require('../middlewares/authMiddleware');
 const { register, login } = require('../controllers/authController');
 const { validate, registerSchema, loginSchema } = require('../validators/authValidator');
+const { createCategory, getAllCategories, getCategoryById, updateCategory, deleteCategory } = require('../controllers/categoryController');
+const { createTicket, getAllTickets, getMyTickets, getTicketById, updateTicket, addCommentToTicket } = require('../controllers/ticketController');
 
 // Rotas de Autenticação
 router.post('/auth/register', validate(registerSchema), register);
@@ -38,6 +40,21 @@ router.route('/categories/:id')
   .get(authenticateToken, getCategoryById)
   .put(authenticateToken, authorizeRole(['admin']), updateCategory)
   .delete(authenticateToken, authorizeRole(['admin']), deleteCategory);
+
+// Rotas de Tickets
+router.route('/tickets')
+  .post(authenticateToken, createTicket)
+  .get(authenticateToken, authorizeRole(['admin', 'manager']), getAllTickets);
+
+router.route('/tickets/mytickets')
+  .get(authenticateToken, getMyTickets);
+
+router.route('/tickets/:id')
+  .get(authenticateToken, getTicketById)
+  .put(authenticateToken, authorizeRole(['admin', 'manager']), updateTicket);
+
+router.route('/tickets/:id/comments')
+  .post(authenticateToken, addCommentToTicket);
 
 
 module.exports = router;
