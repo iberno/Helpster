@@ -65,6 +65,35 @@ const setupDatabase = async () => {
     `);
     console.log('Tabela "comments" verificada/criada.');
 
+    // 5. Tabela de Permissões
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS permissions (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) UNIQUE NOT NULL, -- Ex: 'users:create', 'tickets:read_all'
+        description TEXT
+      );
+    `);
+    console.log('Tabela "permissions" verificada/criada.');
+
+    // 6. Tabela de Perfis (Roles)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS roles (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(50) UNIQUE NOT NULL -- Ex: 'admin', 'manager', 'user'
+      );
+    `);
+    console.log('Tabela "roles" verificada/criada.');
+
+    // 7. Tabela de Junção: role_permissions
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS role_permissions (
+        role_id INTEGER NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+        permission_id INTEGER NOT NULL REFERENCES permissions(id) ON DELETE CASCADE,
+        PRIMARY KEY (role_id, permission_id)
+      );
+    `);
+    console.log('Tabela "role_permissions" verificada/criada.');
+
     console.log('Configuração do banco de dados do Helpster concluída com sucesso!');
   } catch (error) {
     console.error('Erro durante a configuração do banco de dados:', error);

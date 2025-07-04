@@ -40,6 +40,91 @@ const seedDatabase = async () => {
     const clientId = clientUser.rows[0].id;
     console.log('Usuários inseridos.');
 
+    // Inserir Permissões
+    const permissions = [
+      { name: 'users:manage', description: 'Gerenciar usuários' },
+      { name: 'roles:manage', description: 'Gerenciar perfis e permissões' },
+      { name: 'tickets:create', description: 'Criar tickets' },
+      { name: 'tickets:read_own', description: 'Visualizar próprios tickets' },
+      { name: 'tickets:read_all', description: 'Visualizar todos os tickets' },
+      { name: 'tickets:assign', description: 'Atribuir tickets' },
+      { name: 'tickets:update', description: 'Atualizar tickets' },
+      { name: 'tickets:reassign_level', description: 'Redirecionar tickets entre níveis' },
+      { name: 'tickets:reassign_any', description: 'Redirecionar qualquer ticket' },
+      { name: 'comments:add_public', description: 'Adicionar comentários públicos' },
+      { name: 'comments:add_internal', description: 'Adicionar comentários internos' },
+      { name: 'categories:manage', description: 'Gerenciar categorias' },
+      { name: 'dashboard:view', description: 'Visualizar dashboard' },
+      { name: 'system:manage_settings', description: 'Gerenciar configurações do sistema' },
+    ];
+
+    const insertedPermissions = {};
+    for (const perm of permissions) {
+      const { rows } = await pool.query(
+        'INSERT INTO permissions (name, description) VALUES ($1, $2) RETURNING id, name',
+        [perm.name, perm.description]
+      );
+      insertedPermissions[rows[0].name] = rows[0].id;
+    }
+    console.log('Permissões inseridas.');
+
+    // Inserir Perfis (Roles)
+    const roles = [
+      { name: 'admin' },
+      { name: 'manager' },
+      { name: 'user' },
+    ];
+
+    const insertedRoles = {};
+    for (const role of roles) {
+      const { rows } = await pool.query(
+        'INSERT INTO roles (name) VALUES ($1) RETURNING id, name',
+        [role.name]
+      );
+      insertedRoles[rows[0].name] = rows[0].id;
+    }
+    console.log('Perfis (Roles) inseridos.');
+
+    // Associar Permissões aos Perfis
+    // Admin: Todas as permissões
+    for (const permName in insertedPermissions) {
+      await pool.query(
+        'INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2)',
+        [insertedRoles.admin, insertedPermissions[permName]]
+      );
+    }
+
+    // Manager: Permissões específicas
+    const managerPermissions = [
+      'tickets:read_all',
+      'tickets:assign',
+      'tickets:update',
+      'tickets:reassign_level',
+      'comments:add_public',
+      'comments:add_internal',
+      'dashboard:view',
+    ];
+    for (const permName of managerPermissions) {
+      await pool.query(
+        'INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2)',
+        [insertedRoles.manager, insertedPermissions[permName]]
+      );
+    }
+
+    // User: Permissões específicas
+    const userPermissions = [
+      'tickets:create',
+      'tickets:read_own',
+      'comments:add_public',
+    ];
+    for (const permName of userPermissions) {
+      await pool.query(
+        'INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2)',
+        [insertedRoles.user, insertedPermissions[permName]]
+      );
+    }
+    console.log('Permissões associadas aos perfis.');
+
     // Inserir Categorias
     const categories = [
       { name: 'Hardware', description: 'Problemas relacionados a componentes físicos.' },
