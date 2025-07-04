@@ -75,7 +75,16 @@ const getTicketById = asyncHandler(async (req, res) => {
   }
 
   // Pega os comentários associados
-  const commentsResult = await pool.query('SELECT * FROM comments WHERE ticket_id = $1 ORDER BY created_at ASC', [id]);
+  const commentsQuery = `
+    SELECT 
+      com.*,
+      u.name as author_name
+    FROM comments com
+    JOIN users u ON com.author_id = u.id
+    WHERE com.ticket_id = $1
+    ORDER BY com.created_at ASC
+  `;
+  const commentsResult = await pool.query(commentsQuery, [id]);
 
   res.status(200).json({ ...ticket, comments: commentsResult.rows });
 });
@@ -116,7 +125,27 @@ const addCommentToTicket = asyncHandler(async (req, res) => {
     [content, visibility || 'Público', id, author_id]
   );
 
-  res.status(201).json(rows[0]);
+  const newComment = rows[0];
+
+  // Se o comentário for público, notificar o cliente do ticket
+  if (newComment.visibility === 'Público') {
+    const ticketResult = await pool.query('SELECT title, client_id FROM tickets WHERE id = $1', [id]);
+    const ticket = ticketResult.rows[0];
+    if (ticket) {
+      const clientUserResult = await pool.query('SELECT email FROM users WHERE id = $1', [ticket.client_id]);
+      const clientEmail = clientUserResult.rows[0]?.email;
+      if (clientEmail) {
+        sendTicketUpdateEmail(
+          clientEmail,
+          ticket.id,
+          ticket.title,
+          `Um novo comentário público foi adicionado ao seu ticket: <br/><br/><em>\"${newComment.content}\"</em>`
+        );
+      }
+    }
+  }
+
+  res.status(201).json(newComment);
 });
 
 module.exports = {

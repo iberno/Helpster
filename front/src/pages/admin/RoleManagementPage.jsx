@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import useAuth from '../../hooks/useAuth';
 import authService from '../../services/authService';
-import { allPermissions } from '../../data/permissions';
 
 const RoleManagementPage = () => {
   const { token } = useAuth();
   const [roles, setRoles] = useState([]);
+  const [allPermissions, setAllPermissions] = useState([]); // Novo estado para permissões reais
   const [roleName, setRoleName] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState([]);
 

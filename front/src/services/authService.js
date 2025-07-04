@@ -91,22 +91,19 @@ const getUsers = async (token) => {
   return data;
 };
 
-const createUser = async (token, userData) => {
-  console.log('Creating user:', userData); // Simula a chamada de API
-  return Promise.resolve({ id: Date.now(), ...userData });
-};
-
-const getRoles = async (token) => {
-  return Promise.resolve([
-    { id: 1, name: 'Admin', permissions: ['users:create', 'users:read', 'users:update', 'users:delete', 'roles:create', 'roles:read', 'roles:update', 'roles:delete', 'content:manage', 'settings:update'] },
-    { id: 2, name: 'Manager', permissions: ['users:read', 'content:manage'] },
-    { id: 3, name: 'User', permissions: ['content:read'] },
-  ]);
-};
-
-const createRole = async (token, roleData) => {
-  console.log('Creating role:', roleData);
-  return Promise.resolve({ id: Date.now(), ...roleData });
+const getAllPermissions = async (token) => {
+  const response = await fetch(`${API_URL}/permissions`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || 'Falha ao buscar permissões');
+  }
+  return data;
 };
 
 export default {
@@ -116,6 +113,7 @@ export default {
   getAdminData,
   getManagerData,
   getUsers,
-  getRoles,
+  getAllPermissions,
+  getAllRoles,
   createRole,
 };

@@ -6,6 +6,13 @@ const { validate, registerSchema, loginSchema } = require('../validators/authVal
 const { createCategory, getAllCategories, getCategoryById, updateCategory, deleteCategory } = require('../controllers/categoryController');
 const { createTicket, getAllTickets, getMyTickets, getTicketById, updateTicket, addCommentToTicket } = require('../controllers/ticketController');
 const { getAllUsers } = require('../controllers/userController');
+const {
+  getAllPermissions,
+  createRole,
+  getAllRoles,
+  updateRolePermissions,
+  deleteRole,
+} = require('../controllers/rolePermissionController');
 
 // Rotas de Autenticação
 router.post('/auth/register', validate(registerSchema), register);

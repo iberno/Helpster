@@ -30,6 +30,13 @@ const AdminPage = () => {
             Gerenciar Perfis
           </Link>
         </div>
+        <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+          <h2 className="text-2xl font-bold mb-4">Gerenciamento de Categorias</h2>
+          <p className="text-gray-600 mb-4">Crie, edite e delete categorias de tickets.</p>
+          <Link to="/admin/categories" className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+            Gerenciar Categorias
+          </Link>
+        </div>
       </div>
     </div>
   );

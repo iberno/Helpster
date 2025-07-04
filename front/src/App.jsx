@@ -7,6 +7,9 @@ import AdminPage from './pages/AdminPage';
 import ManagerPage from './pages/ManagerPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import RoleManagementPage from './pages/admin/RoleManagementPage';
+import TicketListPage from './pages/TicketListPage';
+import CreateTicketPage from './pages/CreateTicketPage';
+import TicketDetailPage from './pages/TicketDetailPage';
 
 function App() {
   return (
@@ -21,7 +24,11 @@ function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/users" element={<UserManagementPage />} />
           <Route path="/admin/roles" element={<RoleManagementPage />} />
+          <Route path="/admin/categories" element={<CategoryManagementPage />} />
           <Route path="/manager" element={<ManagerPage />} />
+          <Route path="/tickets" element={<TicketListPage />} />
+          <Route path="/tickets/new" element={<CreateTicketPage />} />
+          <Route path="/tickets/:id" element={<TicketDetailPage />} />
         </Routes>
       </div>
     </Router>
