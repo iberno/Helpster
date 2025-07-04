@@ -1,0 +1,12 @@
+# Global ignores for the monorepo
+node_modules/
+dist/
+.env
+npm-debug.log*
+yarn-debug.log*
+.pnpm-debug.log*
+.turbo/
+
+# Project-specific .env files
+/rbac_api/.env
+/rbac_front/.env
