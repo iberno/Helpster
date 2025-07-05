@@ -26,6 +26,15 @@ app.use(cors()); // Permite requisições de outras origens
 app.use(helmet()); // Adiciona headers de segurança
 app.use(express.json()); // Habilita o parsing de JSON no corpo das requisições
 
+// Middleware para adicionar o cabeçalho Cross-Origin-Resource-Policy
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+});
+
+// Servir arquivos estáticos da pasta 'public'
+app.use('/public', express.static('public'));
+
 // Rota de health check
 app.get('/', (req, res) => {
   res.status(200).json({ status: 'API is running' });

@@ -5,7 +5,9 @@ const { register, login } = require('../controllers/authController');
 const { validate, registerSchema, loginSchema } = require('../validators/authValidator');
 const { createCategory, getAllCategories, getCategoryById, updateCategory, deleteCategory } = require('../controllers/categoryController');
 const { createTicket, getAllTickets, getMyTickets, getTicketById, updateTicket, addCommentToTicket } = require('../controllers/ticketController');
-const { getAllUsers } = require('../controllers/userController');
+const { getAllUsers, createUser } = require('../controllers/userController');
+const { uploadKbImage, upload } = require('../controllers/uploadController');
+const { createArticle, getAllArticles, getArticleById, updateArticle, deleteArticle } = require('../controllers/knowledgeBaseController');
 const {
   getAllPermissions,
   createRole,
@@ -57,6 +59,11 @@ router.route('/tickets')
 router.route('/tickets/mytickets')
   .get(authenticateToken, getMyTickets);
 
+router.route('/tickets/mytickets')
+  .get(authenticateToken, getMyTickets);
+
+
+
 router.route('/tickets/:id')
   .get(authenticateToken, getTicketById)
   .put(authenticateToken, authorizeRole(['admin', 'manager']), updateTicket);
@@ -66,7 +73,11 @@ router.route('/tickets/:id/comments')
 
 // Rotas de Usuários
 router.route('/users')
+  .post(authenticateToken, authorizeRole(['admin']), createUser)
   .get(authenticateToken, authorizeRole(['admin']), getAllUsers);
+
+// Rotas de Upload de Imagens para KB
+router.post('/kb/upload-image', authenticateToken, authorizeRole(['admin', 'manager']), upload.single('image'), uploadKbImage);
 
 // Rotas de Permissões
 router.route('/permissions')
@@ -82,6 +93,16 @@ router.route('/roles/:id')
 
 router.route('/roles/:id/permissions')
   .put(authenticateToken, authorizeRole(['admin']), updateRolePermissions);
+
+// Rotas da Base de Conhecimento
+router.route('/kb/articles')
+  .post(authenticateToken, authorizeRole(['admin', 'manager']), createArticle)
+  .get(authenticateToken, getAllArticles); // Todos autenticados podem ler
+
+router.route('/kb/articles/:id')
+  .get(authenticateToken, getArticleById) // Todos autenticados podem ler
+  .put(authenticateToken, authorizeRole(['admin', 'manager']), updateArticle)
+  .delete(authenticateToken, authorizeRole(['admin', 'manager']), deleteArticle);
 
 
 

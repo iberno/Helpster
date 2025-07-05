@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import useAuth from '../../hooks/useAuth';
 import authService from '../../services/authService';
+import BackButton from '../../components/BackButton';
 
 const UserManagementPage = () => {
   const { token } = useAuth();
   const [users, setUsers] = useState([]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState(''); // Add name state
   const [role, setRole] = useState('user');
 
   useEffect(() => {
@@ -27,7 +29,7 @@ const UserManagementPage = () => {
   const handleCreateUser = async (e) => {
     e.preventDefault();
     try {
-      const newUser = await authService.createUser(token, { email, password, role });
+      const newUser = await authService.createUser(token, { name, email, password, role });
       setUsers([...users, newUser]);
       setEmail('');
       setPassword('');
@@ -41,11 +43,24 @@ const UserManagementPage = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Gerenciamento de Usuários</h1>
+      <div className="flex items-center mb-4">
+        <BackButton to="/admin" />
+        <h1 className="text-3xl font-bold text-center flex-grow">Gerenciamento de Usuários</h1>
+      </div>
 
       <div className="bg-white p-8 rounded-lg shadow-lg mb-8">
         <h2 className="text-2xl font-bold mb-4">Criar Novo Usuário</h2>
         <form onSubmit={handleCreateUser} className="space-y-4">
+          <div>
+            <label className="block text-gray-700">Nome:</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-3 py-2 border rounded"
+              required
+            />
+          </div>
           <div>
             <label className="block text-gray-700">Email:</label>
             <input

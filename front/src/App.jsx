@@ -11,6 +11,9 @@ import CategoryManagementPage from './pages/admin/CategoryManagementPage';
 import TicketListPage from './pages/TicketListPage';
 import CreateTicketPage from './pages/CreateTicketPage';
 import TicketDetailPage from './pages/TicketDetailPage';
+import KnowledgeBaseListPage from './pages/KnowledgeBaseListPage';
+import KnowledgeBaseFormPage from './pages/admin/KnowledgeBaseFormPage';
+import KnowledgeBaseDetailPage from './pages/KnowledgeBaseDetailPage';
 
 function App() {
   return (
@@ -30,6 +33,10 @@ function App() {
           <Route path="/tickets" element={<TicketListPage />} />
           <Route path="/tickets/new" element={<CreateTicketPage />} />
           <Route path="/tickets/:id" element={<TicketDetailPage />} />
+          <Route path="/knowledge-base" element={<KnowledgeBaseListPage />} />
+          <Route path="/knowledge-base/new" element={<KnowledgeBaseFormPage />} />
+          <Route path="/knowledge-base/:id" element={<KnowledgeBaseDetailPage />} />
+          <Route path="/knowledge-base/:id/edit" element={<KnowledgeBaseFormPage />} />
         </Routes>
       </div>
     </Router>

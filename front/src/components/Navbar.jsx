@@ -14,6 +14,7 @@ const Navbar = () => {
           {user && (
             <>
               <li><Link to="/tickets" className="hover:text-gray-300">Tickets</Link></li>
+              <li><Link to="/knowledge-base" className="hover:text-gray-300">Base de Conhecimento</Link></li>
               <li><Link to="/protected" className="hover:text-gray-300">Protegido</Link></li>
               {user.role === 'admin' && (
                 <li><Link to="/admin" className="hover:text-gray-300">Admin</Link></li>

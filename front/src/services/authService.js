@@ -167,6 +167,22 @@ const deleteRole = async (token, roleId) => {
   return data;
 };
 
+const createUser = async (token, userData) => {
+  const response = await fetch(`${API_URL}/users`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(userData),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || 'Falha ao criar usuário');
+  }
+  return data;
+};
+
 export default {
   register,
   login,
@@ -179,4 +195,5 @@ export default {
   createRole,
   updateRolePermissions,
   deleteRole,
+  createUser,
 };

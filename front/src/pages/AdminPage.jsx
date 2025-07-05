@@ -47,6 +47,13 @@ const AdminPage = () => {
             Gerenciar Categorias
           </Link>
         </div>
+        <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+          <h2 className="text-2xl font-bold mb-4">Base de Conhecimento</h2>
+          <p className="text-gray-600 mb-4">Gerencie artigos e documentação para a Base de Conhecimento.</p>
+          <Link to="/knowledge-base" className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">
+            Gerenciar Artigos
+          </Link>
+        </div>
       </div>
     </div>
   );

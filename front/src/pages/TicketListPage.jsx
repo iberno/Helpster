@@ -3,6 +3,7 @@ import useAuth from '../hooks/useAuth';
 import ticketService from '../services/ticketService';
 import { useNavigate, Link } from 'react-router-dom';
 
+
 const TicketListPage = () => {
   const { user, token, logout } = useAuth();
   const navigate = useNavigate();
@@ -62,7 +63,7 @@ const TicketListPage = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6 text-center">Meus Tickets</h1>
-      {user?.role === 'user' && (
+      {(user?.role === 'user' || user?.role === 'admin' || user?.role === 'manager') && (
         <div className="mb-4 text-right">
           <Link to="/tickets/new" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
             Abrir Novo Ticket
@@ -95,6 +96,7 @@ const TicketListPage = () => {
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold
                       ${ticket.status === 'Aberto' ? 'bg-red-200 text-red-800' :
                         ticket.status === 'Em Andamento' ? 'bg-yellow-200 text-yellow-800' :
+                        ticket.status === 'Aguardando Cliente' ? 'bg-orange-200 text-orange-800' :
                         ticket.status === 'Resolvido' ? 'bg-green-200 text-green-800' :
                         'bg-gray-200 text-gray-800'}
                     `}>
