@@ -1,6 +1,6 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import MainLayout from './components/MainLayout';
 import LoginPage from './pages/LoginPage';
 import ProtectedPage from './pages/ProtectedPage';
 import AdminPage from './pages/AdminPage';
@@ -18,12 +18,11 @@ import KnowledgeBaseDetailPage from './pages/KnowledgeBaseDetailPage';
 function App() {
   return (
     <Router>
-      <Navbar />
-      <div className="container mx-auto p-4">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/public" element={<PublicPage />} />
-          <Route path="/login" element={<LoginPage />} />
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route element={<MainLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/protected" element={<ProtectedPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/users" element={<UserManagementPage />} />
@@ -37,21 +36,16 @@ function App() {
           <Route path="/knowledge-base/new" element={<KnowledgeBaseFormPage />} />
           <Route path="/knowledge-base/:id" element={<KnowledgeBaseDetailPage />} />
           <Route path="/knowledge-base/:id/edit" element={<KnowledgeBaseFormPage />} />
-        </Routes>
-      </div>
+        </Route>
+      </Routes>
     </Router>
   );
 }
 
-const Home = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-100">
-    <h1 className="text-4xl font-bold text-gray-800">Bem-vindo ao RBAC App!</h1>
-  </div>
-);
-
-const PublicPage = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-100">
-    <h1 className="text-4xl font-bold text-gray-800">Esta é uma página pública.</h1>
+const Dashboard = () => (
+  <div>
+    <h1 className="text-4xl font-bold">Dashboard</h1>
+    <p>Bem-vindo ao seu painel de controle.</p>
   </div>
 );
 

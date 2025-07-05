@@ -3,7 +3,6 @@ import useAuth from '../hooks/useAuth';
 import ticketService from '../services/ticketService';
 import { useNavigate, Link } from 'react-router-dom';
 
-
 const TicketListPage = () => {
   const { user, token, logout } = useAuth();
   const navigate = useNavigate();
@@ -12,13 +11,11 @@ const TicketListPage = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Se o token existe mas o usuário ainda não foi decodificado, espere.
     if (token && user === null) {
       setLoading(true);
       return;
     }
 
-    // Se não há token ou usuário é null após o carregamento, redirecione para o login.
     if (!token || user === null) {
       navigate('/login');
       return;
@@ -53,79 +50,84 @@ const TicketListPage = () => {
   }, [token, user, navigate, logout]);
 
   if (loading) {
-    return <div className="text-center mt-8">Carregando tickets...</div>;
+    return <div className="w-full text-center mt-8">Carregando tickets...</div>;
   }
 
   if (error) {
-    return <div className="text-center mt-8 text-red-500">Erro: {error}</div>;
+    return <div className="w-full text-center mt-8 text-red-500">Erro: {error}</div>;
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-center">Meus Tickets</h1>
-      {(user?.role === 'user' || user?.role === 'admin' || user?.role === 'manager') && (
-        <div className="mb-4 text-right">
-          <Link to="/tickets/new" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Abrir Novo Ticket
-          </Link>
+    <div className="w-full px-4">
+      <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded dark:bg-zinc-800 dark:text-gray-100">
+        <div className="rounded-t mb-0 px-4 py-3 border-0 bg-gray-50 dark:bg-zinc-700">
+          <div className="flex flex-wrap items-center">
+            <div className="relative w-full px-4 max-w-full flex-grow flex-1">
+              <h3 className="font-semibold text-base text-gray-800 dark:text-gray-100">Meus Tickets</h3>
+            </div>
+            <div className="relative w-full px-4 max-w-full flex-grow flex-1 text-right">
+              {(user?.role === 'user' || user?.role === 'admin' || user?.role === 'manager') && (
+                <Link to="/tickets/new" className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg text-sm transition duration-200">
+                  Abrir Novo Ticket
+                </Link>
+              )}
+            </div>
+          </div>
         </div>
-      )}
-
-      {tickets.length === 0 ? (
-        <p className="text-center text-gray-600">Nenhum ticket encontrado.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-            <thead className="bg-gray-200 text-gray-700">
-              <tr>
-                <th className="py-3 px-4 text-left">ID</th>
-                <th className="py-3 px-4 text-left">Título</th>
-                <th className="py-3 px-4 text-left">Status</th>
-                <th className="py-3 px-4 text-left">Prioridade</th>
-                <th className="py-3 px-4 text-left">Categoria</th>
-                <th className="py-3 px-4 text-left">Criado Em</th>
-                <th className="py-3 px-4 text-left">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="text-gray-700">
-              {tickets.map((ticket) => (
-                <tr key={ticket.id} className="border-b border-gray-200 hover:bg-gray-100">
-                  <td className="py-3 px-4">{ticket.id}</td>
-                  <td className="py-3 px-4">{ticket.title}</td>
-                  <td className="py-3 px-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold
-                      ${ticket.status === 'Aberto' ? 'bg-red-200 text-red-800' :
-                        ticket.status === 'Em Andamento' ? 'bg-yellow-200 text-yellow-800' :
-                        ticket.status === 'Aguardando Cliente' ? 'bg-orange-200 text-orange-800' :
-                        ticket.status === 'Resolvido' ? 'bg-green-200 text-green-800' :
-                        'bg-gray-200 text-gray-800'}
-                    `}>
-                      {ticket.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold
-                      ${ticket.priority === 'Urgente' ? 'bg-red-200 text-red-800' :
-                        ticket.priority === 'Alta' ? 'bg-orange-200 text-orange-800' :
-                        ticket.priority === 'Média' ? 'bg-yellow-200 text-yellow-800' :
-                        'bg-blue-200 text-blue-800'}
-                    `}>
-                      {ticket.priority}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">{ticket.category_name}</td>
-                  <td className="py-3 px-4">{new Date(ticket.created_at).toLocaleDateString()}</td>
-                  <td className="py-3 px-4">
-                    <Link to={`/tickets/${ticket.id}`} className="text-blue-500 hover:underline">
-                      Ver Detalhes
-                    </Link>
-                  </td>
+        <div className="block w-full overflow-x-auto">
+          {tickets.length === 0 ? (
+            <p className="text-center text-gray-600 p-4 dark:text-gray-300">Nenhum ticket encontrado.</p>
+          ) : (
+            <table className="items-center w-full bg-transparent border-collapse">
+              <thead>
+                <tr>
+                  <th className="px-6 bg-gray-50 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left dark:bg-zinc-700 dark:text-gray-300 dark:border-zinc-600">ID</th>
+                  <th className="px-6 bg-gray-50 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left dark:bg-zinc-700 dark:text-gray-300 dark:border-zinc-600">Título</th>
+                  <th className="px-6 bg-gray-50 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left dark:bg-zinc-700 dark:text-gray-300 dark:border-zinc-600">Status</th>
+                  <th className="px-6 bg-gray-50 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left dark:bg-zinc-700 dark:text-gray-300 dark:border-zinc-600">Prioridade</th>
+                  <th className="px-6 bg-gray-50 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left dark:bg-zinc-700 dark:text-gray-300 dark:border-zinc-600">Categoria</th>
+                  <th className="px-6 bg-gray-50 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left dark:bg-zinc-700 dark:text-gray-300 dark:border-zinc-600">Criado Em</th>
+                  <th className="px-6 bg-gray-50 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left dark:bg-zinc-700 dark:text-gray-300 dark:border-zinc-600">Ações</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {tickets.map((ticket) => (
+                  <tr key={ticket.id} className="dark:bg-zinc-800">
+                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 dark:border-zinc-700">{ticket.id}</td>
+                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 dark:border-zinc-700">{ticket.title}</td>
+                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 dark:border-zinc-700">
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold
+                        ${ticket.status === 'Aberto' ? 'bg-red-200 text-red-800 dark:bg-red-700 dark:text-red-100' :
+                          ticket.status === 'Em Andamento' ? 'bg-yellow-200 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100' :
+                          ticket.status === 'Aguardando Cliente' ? 'bg-orange-200 text-orange-800 dark:bg-orange-700 dark:text-orange-100' :
+                          ticket.status === 'Resolvido' ? 'bg-green-200 text-green-800 dark:bg-green-700 dark:text-green-100' :
+                          'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100'}
+                      `}>
+                        {ticket.status}
+                      </span>
+                    </td>
+                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 dark:border-zinc-700">
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold
+                        ${ticket.priority === 'Urgente' ? 'bg-red-200 text-red-800 dark:bg-red-700 dark:text-red-100' :
+                          ticket.priority === 'Alta' ? 'bg-orange-200 text-orange-800 dark:bg-orange-700 dark:text-orange-100' :
+                          ticket.priority === 'Média' ? 'bg-yellow-200 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100' :
+                          'bg-blue-200 text-blue-800 dark:bg-blue-700 dark:text-blue-100'}
+                      `}>
+                        {ticket.priority}
+                      </span>
+                    </td>
+                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 dark:border-zinc-700">{ticket.category_name}</td>
+                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 dark:border-zinc-700">{new Date(ticket.created_at).toLocaleDateString()}</td>
+                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 dark:border-zinc-700">
+                      <Link to={`/tickets/${ticket.id}`} className="text-blue-500 hover:underline dark:text-blue-400">Ver Detalhes</Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import useAuth from '../hooks/useAuth';
 import ticketService from '../services/ticketService';
 import { useNavigate } from 'react-router-dom';
+import BackButton from '../components/BackButton';
+import { useAlert } from '../contexts/AlertContext';
 
 const CreateTicketPage = () => {
   const { token, user } = useAuth();
@@ -13,6 +15,7 @@ const CreateTicketPage = () => {
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [error, setError] = useState(null);
+  const { showAlert } = useAlert();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -24,7 +27,7 @@ const CreateTicketPage = () => {
         const fetchedCategories = await ticketService.getCategories(token);
         setCategories(fetchedCategories);
         if (fetchedCategories.length > 0) {
-          setCategory(fetchedCategories[0].id); // Seleciona a primeira categoria por padrão
+          setCategory(fetchedCategories[0].id);
         }
       } catch (err) {
         console.error('Erro ao buscar categorias:', err);
@@ -40,7 +43,7 @@ const CreateTicketPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title || !description || !category) {
-      alert('Por favor, preencha todos os campos obrigatórios.');
+      showAlert('Por favor, preencha todos os campos obrigatórios.', 'error');
       return;
     }
 
@@ -51,97 +54,81 @@ const CreateTicketPage = () => {
         category_id: category,
         priority,
       });
-      alert('Ticket criado com sucesso!');
+      showAlert('Ticket criado com sucesso!', 'success');
       navigate('/tickets');
     } catch (err) {
       console.error('Erro ao criar ticket:', err);
-      alert(err.message || 'Falha ao criar ticket.');
+      showAlert(err.message || 'Falha ao criar ticket.', 'error');
     }
   };
 
   if (loadingCategories) {
-    return <div className="text-center mt-8">Carregando formulário...</div>;
+    return <div className="w-full text-center mt-8">Carregando formulário...</div>;
   }
 
   if (error) {
-    return <div className="text-center mt-8 text-red-500">Erro: {error}</div>;
+    return <div className="w-full text-center mt-8 text-red-500">Erro: {error}</div>;
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex items-center mb-4">
-        <button
-          onClick={() => navigate('/tickets')}
-          className="flex items-center text-blue-500 hover:text-blue-700 font-bold py-2 px-4 rounded"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-          </svg>
-          Voltar
-        </button>
-        <h1 className="text-3xl font-bold text-center flex-grow">Abrir Novo Ticket</h1>
+    <div className="w-full px-4">
+      <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-white dark:bg-zinc-800 dark:text-gray-100 border-0">
+        <div className="rounded-t bg-white dark:bg-zinc-700 mb-0 px-6 py-6">
+          <div className="text-center flex justify-between">
+            <h6 className="text-gray-800 dark:text-gray-100 text-xl font-bold">Abrir Novo Ticket</h6>
+            <BackButton to="/tickets" />
+          </div>
+        </div>
+        <div className="flex-auto px-4 lg:px-10 py-10 pt-0">
+          <form onSubmit={handleSubmit}>
+            <h6 className="text-gray-500 dark:text-gray-400 text-sm mt-3 mb-6 font-bold uppercase">Detalhes do Ticket</h6>
+            <div className="flex flex-wrap">
+              <div className="w-full lg:w-12/12 px-4">
+                <div className="relative w-full mb-3">
+                  <label className="block uppercase text-gray-600 dark:text-gray-300 text-xs font-bold mb-2">Título</label>
+                  <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" required />
+                </div>
+              </div>
+              <div className="w-full lg:w-12/12 px-4">
+                <div className="relative w-full mb-3">
+                  <label className="block uppercase text-gray-600 dark:text-gray-300 text-xs font-bold mb-2">Descrição</label>
+                  <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" rows="4" required></textarea>
+                </div>
+              </div>
+              <div className="w-full lg:w-6/12 px-4">
+                <div className="relative w-full mb-3">
+                  <label className="block uppercase text-gray-600 dark:text-gray-300 text-xs font-bold mb-2">Categoria</label>
+                  <select value={category} onChange={(e) => setCategory(e.target.value)} className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" required>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="w-full lg:w-6/12 px-4">
+                <div className="relative w-full mb-3">
+                  <label className="block uppercase text-gray-600 dark:text-gray-300 text-xs font-bold mb-2">Prioridade</label>
+                  <select value={priority} onChange={(e) => setPriority(e.target.value)} className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150">
+                    <option value="Baixa">Baixa</option>
+                    <option value="Média">Média</option>
+                    <option value="Alta">Alta</option>
+                    <option value="Urgente">Urgente</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-wrap">
+              <div className="w-full lg:w-12/12 px-4">
+                <button type="submit" className="bg-blue-500 text-white active:bg-blue-600 font-bold py-2 px-4 rounded-lg text-sm transition duration-200">Criar Ticket</button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-lg max-w-2xl mx-auto space-y-6">
-        <div>
-          <label htmlFor="title" className="block text-gray-700 text-sm font-bold mb-2">Título:</label>
-          <input
-            type="text"
-            id="title"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="description" className="block text-gray-700 text-sm font-bold mb-2">Descrição:</label>
-          <textarea
-            id="description"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-32"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          ></textarea>
-        </div>
-        <div>
-          <label htmlFor="category" className="block text-gray-700 text-sm font-bold mb-2">Categoria:</label>
-          <select
-            id="category"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            required
-          >
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="priority" className="block text-gray-700 text-sm font-bold mb-2">Prioridade:</label>
-          <select
-            id="priority"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-          >
-            <option value="Baixa">Baixa</option>
-            <option value="Média">Média</option>
-            <option value="Alta">Alta</option>
-            <option value="Urgente">Urgente</option>
-          </select>
-        </div>
-        <button
-          type="submit"
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-        >
-          Criar Ticket
-        </button>
-      </form>
     </div>
   );
 };
 
 export default CreateTicketPage;
+
+//

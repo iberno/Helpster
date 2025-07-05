@@ -3,6 +3,7 @@ import useAuth from '../../hooks/useAuth';
 import authService from '../../services/authService';
 import BackButton from '../../components/BackButton';
 import { allPermissions as staticAllPermissions } from '../../data/permissions';
+import { useAlert } from '../../contexts/AlertContext';
 
 const RoleManagementPage = () => {
   const { token } = useAuth();
@@ -13,11 +14,12 @@ const RoleManagementPage = () => {
   const [editingRole, setEditingRole] = useState(null);
   const [editRoleName, setEditRoleName] = useState('');
   const [editSelectedPermissions, setEditSelectedPermissions] = useState([]);
+  const { showAlert } = useAlert();
 
   useEffect(() => {
     fetchRoles();
     fetchPermissions();
-  }, [token]);
+  }, [token, showAlert]);
 
   const fetchRoles = async () => {
     try {
@@ -25,7 +27,7 @@ const RoleManagementPage = () => {
       setRoles(rolesData);
     } catch (error) {
       console.error('Failed to fetch roles:', error);
-      alert('Falha ao buscar perfis.');
+      showAlert('Falha ao buscar perfis.', 'error');
     }
   };
 
@@ -35,7 +37,7 @@ const RoleManagementPage = () => {
       setAllPermissions(permissionsData);
     } catch (error) {
       console.error('Failed to fetch permissions:', error);
-      alert('Falha ao buscar permissões.');
+      showAlert('Falha ao buscar permissões.', 'error');
     }
   };
 
@@ -58,7 +60,7 @@ const RoleManagementPage = () => {
   const handleCreateRole = async (e) => {
     e.preventDefault();
     if (roleName.trim() === '') {
-      alert('O nome do perfil não pode ser vazio.');
+      showAlert('O nome do perfil não pode ser vazio.', 'error');
       return;
     }
     try {
@@ -69,32 +71,30 @@ const RoleManagementPage = () => {
       setRoles([...roles, newRole]);
       setRoleName('');
       setSelectedPermissions([]);
-      alert('Perfil criado com sucesso!');
+      showAlert('Perfil criado com sucesso!', 'success');
     } catch (error) {
       console.error('Failed to create role:', error);
-      alert('Falha ao criar perfil.');
+      showAlert('Falha ao criar perfil.', 'error');
     }
   };
 
   const handleEditClick = (role) => {
     setEditingRole(role.id);
     setEditRoleName(role.name);
-    // Mapeia os nomes das permissões para os IDs correspondentes
     const currentPermissionIds = role.permissions.map(pName => allPermissions.find(p => p.name === pName)?.id).filter(Boolean);
     setEditSelectedPermissions(currentPermissionIds);
   };
 
   const handleUpdateRole = async (roleId) => {
     try {
-      // Mapeia os IDs de permissão de volta para os nomes para enviar ao backend
       const permissionsToUpdate = editSelectedPermissions;
       await authService.updateRolePermissions(token, roleId, permissionsToUpdate);
       setEditingRole(null);
-      fetchRoles(); // Recarrega a lista de perfis
-      alert('Perfil atualizado com sucesso!');
+      fetchRoles();
+      showAlert('Perfil atualizado com sucesso!', 'success');
     } catch (error) {
       console.error('Failed to update role:', error);
-      alert('Falha ao atualizar perfil.');
+      showAlert('Falha ao atualizar perfil.', 'error');
     }
   };
 
@@ -102,134 +102,94 @@ const RoleManagementPage = () => {
     if (window.confirm('Tem certeza que deseja deletar este perfil? Isso removerá todas as associações de permissão.')) {
       try {
         await authService.deleteRole(token, roleId);
-        fetchRoles(); // Recarrega a lista de perfis
-        alert('Perfil deletado com sucesso!');
+        fetchRoles();
+        showAlert('Perfil deletado com sucesso!', 'success');
       } catch (error) {
         console.error('Failed to delete role:', error);
-        alert('Falha ao deletar perfil.');
+        showAlert('Falha ao deletar perfil.', 'error');
       }
     }
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex items-center mb-4">
-        <BackButton to="/admin" />
-        <h1 className="text-3xl font-bold text-center flex-grow">Gerenciamento de Perfis</h1>
+    <div className="w-full px-4">
+      <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-white dark:bg-zinc-800 dark:text-gray-100 border-0">
+        <div className="rounded-t bg-white dark:bg-zinc-700 mb-0 px-6 py-6">
+          <div className="text-center flex justify-between">
+            <h6 className="text-gray-800 dark:text-gray-100 text-xl font-bold">Gerenciamento de Perfis</h6>
+            <BackButton to="/admin" />
+          </div>
+        </div>
+        <div className="flex-auto px-4 lg:px-10 py-10 pt-0">
+          <form onSubmit={handleCreateRole}>
+            <h6 className="text-gray-500 dark:text-gray-400 text-sm mt-3 mb-6 font-bold uppercase">Criar Novo Perfil</h6>
+            <div className="flex flex-wrap">
+              <div className="w-full lg:w-12/12 px-4">
+                <div className="relative w-full mb-3">
+                  <label className="block uppercase text-gray-600 dark:text-gray-300 text-xs font-bold mb-2">Nome do Perfil</label>
+                  <input type="text" value={roleName} onChange={(e) => setRoleName(e.target.value)} className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" required />
+                </div>
+              </div>
+              <div className="w-full lg:w-12/12 px-4">
+                <div className="relative w-full mb-3">
+                  <label className="block uppercase text-gray-600 dark:text-gray-300 text-xs font-bold mb-2">Permissões</label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {allPermissions.map((permission) => (
+                      <label key={permission.id} className="flex items-center space-x-2">
+                        <input type="checkbox" checked={selectedPermissions.includes(permission.id)} onChange={() => handlePermissionChange(permission.id)} className="form-checkbox h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        <span className="text-gray-700 dark:text-gray-200">{permission.description}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-wrap">
+              <div className="w-full lg:w-12/12 px-4">
+                <button type="submit" className="bg-blue-500 text-white active:bg-blue-600 font-bold py-2 px-4 rounded-lg text-sm transition duration-200">Criar Perfil</button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
 
-      <div className="bg-white p-8 rounded-lg shadow-lg mb-8">
-        <h2 className="text-2xl font-bold mb-4">Criar Novo Perfil</h2>
-        <form onSubmit={handleCreateRole} className="space-y-4">
-          <div>
-            <label className="block text-gray-700">Nome do Perfil:</label>
-            <input
-              type="text"
-              value={roleName}
-              onChange={(e) => setRoleName(e.target.value)}
-              className="w-full px-3 py-2 border rounded"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 mb-2">Permissões:</label>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {allPermissions.map((permission) => (
-                <label key={permission.id} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedPermissions.includes(permission.id)}
-                    onChange={() => handlePermissionChange(permission.id)}
-                    className="form-checkbox h-5 w-5 text-blue-600"
-                  />
-                  <span className="text-gray-700">{permission.description}</span>
-                </label>
-              ))}
+      <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded dark:bg-zinc-800 dark:text-gray-100">
+        <div className="rounded-t mb-0 px-4 py-3 border-0 bg-gray-50 dark:bg-zinc-700">
+          <div className="flex flex-wrap items-center">
+            <div className="relative w-full px-4 max-w-full flex-grow flex-1">
+              <h3 className="font-semibold text-base text-gray-800 dark:text-gray-100">Perfis Existentes</h3>
             </div>
           </div>
-          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-            Criar Perfil
-          </button>
-        </form>
-      </div>
-
-      <div className="bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-4">Lista de Perfis</h2>
-        <ul className="space-y-4">
-          {roles.map((role) => (
-            <li key={role.id} className="p-4 border rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center">
-              {editingRole === role.id ? (
-                <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                  <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-1">Nome:</label>
-                    <input
-                      type="text"
-                      value={editRoleName}
-                      onChange={(e) => setEditRoleName(e.target.value)}
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-gray-700 text-sm font-bold mb-1">Permissões:</label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                      {allPermissions.map((permission) => (
-                        <label key={permission.id} className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            checked={editSelectedPermissions.includes(permission.id)}
-                            onChange={() => handleEditPermissionChange(permission.id)}
-                            className="form-checkbox h-5 w-5 text-blue-600"
-                          />
-                          <span className="text-gray-700 text-sm">{permission.description}</span>
-                        </label>
+        </div>
+        <div className="block w-full overflow-x-auto">
+          <table className="items-center w-full bg-transparent border-collapse">
+            <thead>
+              <tr>
+                <th className="px-6 bg-gray-50 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left dark:bg-zinc-700 dark:text-gray-300 dark:border-zinc-600">Nome</th>
+                <th className="px-6 bg-gray-50 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left dark:bg-zinc-700 dark:text-gray-300 dark:border-zinc-600">Permissões</th>
+                <th className="px-6 bg-gray-50 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left dark:bg-zinc-700 dark:text-gray-300 dark:border-zinc-600">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {roles.map((role) => (
+                <tr key={role.id} className="dark:bg-zinc-800">
+                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 dark:border-zinc-700">{role.name}</td>
+                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 dark:border-zinc-700">
+                    <ul className="list-disc list-inside">
+                      {role.permissions.map((p) => (
+                        <li key={p} className="text-gray-700 dark:text-gray-200">{staticAllPermissions.find(perm => perm.id === p)?.description || p}</li>
                       ))}
-                    </div>
-                  </div>
-                  <div className="md:col-span-2 flex justify-end space-x-2 mt-4">
-                    <button
-                      onClick={() => handleUpdateRole(role.id)}
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                    >
-                      Salvar
-                    </button>
-                    <button
-                      onClick={() => setEditingRole(null)}
-                      className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex-grow">
-                  <h3 className="text-xl font-semibold">{role.name}</h3>
-                  <p className="text-sm text-gray-500">Permissões:</p>
-                  <ul className="list-disc list-inside mt-2">
-                    {role.permissions.map((p) => (
-                      <li key={p} className="text-gray-600">{staticAllPermissions.find(perm => perm.id === p)?.description || p}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {editingRole !== role.id && (
-                <div className="flex space-x-2 mt-4 md:mt-0">
-                  <button
-                    onClick={() => handleEditClick(role)}
-                    className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDeleteRole(role.id)}
-                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                  >
-                    Deletar
-                  </button>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
+                    </ul>
+                  </td>
+                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 dark:border-zinc-700">
+                    <button onClick={() => handleEditClick(role)} className="bg-yellow-500 text-white active:bg-yellow-600 font-bold py-2 px-4 rounded-lg text-sm transition duration-200">Editar</button>
+                    <button onClick={() => handleDeleteRole(role.id)} className="bg-red-500 text-white active:bg-red-600 font-bold py-2 px-4 rounded-lg text-sm transition duration-200">Deletar</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

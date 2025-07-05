@@ -25,10 +25,13 @@ const useAuth = () => {
     setToken(newToken);
   };
 
-  const logout = () => {
+  const logout = (onLogoutSuccess) => {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
+    if (onLogoutSuccess && typeof onLogoutSuccess === 'function') {
+      onLogoutSuccess();
+    }
   };
 
   return { token, user, login, logout };
