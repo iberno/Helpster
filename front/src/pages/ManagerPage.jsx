@@ -10,12 +10,20 @@ const ManagerPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Se o token existe mas o usuário ainda não foi decodificado, espere.
+    if (token && !user) {
+      setLoading(true);
+      return;
+    }
+
+    // Se não há usuário ou a role não é permitida, redirecione.
+    if (!user || (user.role !== 'admin' && user.role !== 'manager')) {
+      alert('Acesso negado. Apenas gerentes e administradores podem acessar esta página.');
+      navigate('/login');
+      return;
+    }
+
     const fetchData = async () => {
-      if (!token || (user?.role !== 'admin' && user?.role !== 'manager')) {
-        alert('Acesso negado. Apenas gerentes e administradores podem acessar esta página.');
-        navigate('/login');
-        return;
-      }
       try {
         const data = await authService.getManagerData(token);
         setMessage(data.message);

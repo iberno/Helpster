@@ -1,15 +1,25 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 
 const AdminPage = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const navigate = useNavigate();
 
-  // Se não for admin, redireciona
-  if (user?.role !== 'admin') {
-    navigate('/login');
-    return null; // Renderiza nada enquanto redireciona
+  useEffect(() => {
+    // Se o token existe mas o usuário ainda não foi decodificado, espere.
+    if (token && !user) {
+      return;
+    }
+
+    if (user?.role !== 'admin') {
+      navigate('/login');
+    }
+  }, [user, navigate, token]);
+
+  // Adicione um estado de carregamento ou verificação para user
+  if (!user || user.role !== 'admin') {
+    return <div className="text-center mt-8">Carregando permissões...</div>; // Ou um spinner de carregamento
   }
 
   return (

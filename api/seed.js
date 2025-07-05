@@ -11,10 +11,13 @@ const seedDatabase = async () => {
     console.log('Iniciando o processo de seed do banco de dados...');
 
     // Limpar tabelas (ordem inversa das dependências)
+    await pool.query('DELETE FROM role_permissions;');
     await pool.query('DELETE FROM comments;');
     await pool.query('DELETE FROM tickets;');
     await pool.query('DELETE FROM categories;');
     await pool.query('DELETE FROM users;');
+    await pool.query('DELETE FROM roles;');
+    await pool.query('DELETE FROM permissions;');
     console.log('Tabelas limpas.');
 
     // Inserir Usuários

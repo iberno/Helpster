@@ -106,6 +106,67 @@ const getAllPermissions = async (token) => {
   return data;
 };
 
+const getAllRoles = async (token) => {
+  const response = await fetch(`${API_URL}/roles`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || 'Falha ao buscar perfis');
+  }
+  return data;
+};
+
+const createRole = async (token, roleData) => {
+  const response = await fetch(`${API_URL}/roles`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(roleData),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || 'Falha ao criar perfil');
+  }
+  return data;
+};
+
+const updateRolePermissions = async (token, roleId, permissions) => {
+  const response = await fetch(`${API_URL}/roles/${roleId}/permissions`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ permissions }),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || 'Falha ao atualizar permissões do perfil');
+  }
+  return data;
+};
+
+const deleteRole = async (token, roleId) => {
+  const response = await fetch(`${API_URL}/roles/${roleId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || 'Falha ao deletar perfil');
+  }
+  return data;
+};
+
 export default {
   register,
   login,
@@ -116,4 +177,6 @@ export default {
   getAllPermissions,
   getAllRoles,
   createRole,
+  updateRolePermissions,
+  deleteRole,
 };

@@ -7,6 +7,7 @@ import AdminPage from './pages/AdminPage';
 import ManagerPage from './pages/ManagerPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import RoleManagementPage from './pages/admin/RoleManagementPage';
+import CategoryManagementPage from './pages/admin/CategoryManagementPage';
 import TicketListPage from './pages/TicketListPage';
 import CreateTicketPage from './pages/CreateTicketPage';
 import TicketDetailPage from './pages/TicketDetailPage';

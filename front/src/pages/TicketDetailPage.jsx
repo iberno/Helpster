@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import useAuth from '../../hooks/useAuth';
-import ticketService from '../../services/ticketService';
+import useAuth from '../hooks/useAuth';
+import ticketService from '../services/ticketService';
 
 const TicketDetailPage = () => {
   const { id } = useParams();
@@ -60,6 +60,7 @@ const TicketDetailPage = () => {
   };
 
   const handleUpdateTicket = async (field, value) => {
+    console.log(`Attempting to update ticket ${id}. Field: ${field}, Value: ${value}. Current user ID: ${user.id}`);
     try {
       const updatedTicket = await ticketService.updateTicket(token, id, { [field]: value });
       setTicket(updatedTicket);

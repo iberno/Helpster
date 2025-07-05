@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import useAuth from '../../hooks/useAuth';
-import ticketService from '../../services/ticketService';
+import useAuth from '../hooks/useAuth';
+import ticketService from '../services/ticketService';
 import { useNavigate, Link } from 'react-router-dom';
 
 const TicketListPage = () => {
@@ -11,17 +11,24 @@ const TicketListPage = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchTickets = async () => {
-      if (!token) {
-        navigate('/login');
-        return;
-      }
+    // Se o token existe mas o usuário ainda não foi decodificado, espere.
+    if (token && user === null) {
+      setLoading(true);
+      return;
+    }
 
+    // Se não há token ou usuário é null após o carregamento, redirecione para o login.
+    if (!token || user === null) {
+      navigate('/login');
+      return;
+    }
+
+    const fetchTickets = async () => {
       try {
         let fetchedTickets;
-        if (user?.role === 'admin' || user?.role === 'manager') {
+        if (user.role === 'admin' || user.role === 'manager') {
           fetchedTickets = await ticketService.getAllTickets(token);
-        } else if (user?.role === 'user') {
+        } else if (user.role === 'user') {
           fetchedTickets = await ticketService.getMyTickets(token);
         } else {
           setError('Você não tem permissão para visualizar tickets.');

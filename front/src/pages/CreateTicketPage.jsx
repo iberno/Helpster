@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import useAuth from '../../hooks/useAuth';
-import ticketService from '../../services/ticketService';
+import useAuth from '../hooks/useAuth';
+import ticketService from '../services/ticketService';
 import { useNavigate } from 'react-router-dom';
 
 const CreateTicketPage = () => {

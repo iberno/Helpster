@@ -10,6 +10,7 @@ const useAuth = () => {
       try {
         const decodedUser = jwtDecode(token);
         setUser(decodedUser);
+        console.log("Usuário decodificado:", decodedUser);
       } catch (error) {
         console.error("Erro ao decodificar o token:", error);
         logout();

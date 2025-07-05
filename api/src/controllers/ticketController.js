@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const { pool } = require('../config/database');
+const { sendTicketUpdateEmail, sendTicketAssignedEmail } = require('../services/emailService');
 
 // @desc    Criar um novo ticket
 // @route   POST /api/tickets
@@ -96,18 +97,63 @@ const updateTicket = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { status, priority, support_level, agent_id } = req.body;
 
-  // Lógica para construir a query dinamicamente no futuro
-  const { rows } = await pool.query(
-    'UPDATE tickets SET status = $1, priority = $2, support_level = $3, agent_id = $4, updated_at = CURRENT_TIMESTAMP WHERE id = $5 RETURNING *',
-    [status, priority, support_level, agent_id, id]
-  );
+  console.log('updateTicket: req.body', req.body); // Log do corpo da requisição
 
-  if (rows.length === 0) {
+  const oldTicketResult = await pool.query('SELECT * FROM tickets WHERE id = $1', [id]);
+  const oldTicket = oldTicketResult.rows[0];
+
+  console.log('updateTicket: oldTicket from DB', oldTicket); // Log do ticket antigo do DB
+
+  if (!oldTicket) {
     res.status(404);
     throw new Error('Ticket não encontrado.');
   }
 
-  res.status(200).json(rows[0]);
+  // Prepara os valores para a query de atualização, garantindo fallbacks
+  const newStatus = status !== undefined ? status : oldTicket.status;
+  const newPriority = priority !== undefined ? priority : oldTicket.priority;
+  const newSupportLevel = support_level !== undefined ? support_level : oldTicket.support_level;
+  const newAgentId = agent_id !== undefined ? agent_id : oldTicket.agent_id; // Usa old agent_id se não fornecido
+
+  console.log('updateTicket: Values for query:', { newStatus, newPriority, newSupportLevel, newAgentId }); // Log dos valores antes da query
+
+  const { rows } = await pool.query(
+    'UPDATE tickets SET status = $1, priority = $2, support_level = $3, agent_id = $4, updated_at = CURRENT_TIMESTAMP WHERE id = $5 RETURNING *',
+    [newStatus, newPriority, newSupportLevel, newAgentId, id]
+  );
+
+  const updatedTicket = rows[0];
+
+  // Enviar email se o status ou prioridade mudou
+  if (oldTicket.status !== updatedTicket.status || oldTicket.priority !== updatedTicket.priority) {
+    const clientUserResult = await pool.query('SELECT email FROM users WHERE id = $1', [updatedTicket.client_id]);
+    const clientEmail = clientUserResult.rows[0]?.email;
+    if (clientEmail) {
+      sendTicketUpdateEmail(
+        clientEmail,
+        updatedTicket.id,
+        updatedTicket.title,
+        `O status do seu ticket foi alterado para <strong>${updatedTicket.status}</strong> e a prioridade para <strong>${updatedTicket.priority}</strong>.`
+      );
+    }
+  }
+
+  // Enviar email se o agente foi atribuído ou alterado
+  if (agent_id && oldTicket.agent_id !== agent_id) {
+    const agentUserResult = await pool.query('SELECT email, name FROM users WHERE id = $1', [agent_id]);
+    const agentEmail = agentUserResult.rows[0]?.email;
+    const agentName = agentUserResult.rows[0]?.name;
+    if (agentEmail) {
+      sendTicketAssignedEmail(
+        agentEmail,
+        updatedTicket.id,
+        updatedTicket.title,
+        agentName
+      );
+    }
+  }
+
+  res.status(200).json(updatedTicket);
 });
 
 // @desc    Adicionar um comentário a um ticket
@@ -117,6 +163,11 @@ const addCommentToTicket = asyncHandler(async (req, res) => {
   const { id } = req.params; // ID do ticket
   const { content, visibility } = req.body;
   const author_id = req.user.id;
+
+  console.log('addCommentToTicket: Ticket ID:', id);
+  console.log('addCommentToTicket: Content:', content);
+  console.log('addCommentToTicket: Visibility:', visibility);
+  console.log('addCommentToTicket: Author ID:', author_id);
 
   // TODO: Adicionar lógica de permissão mais granular aqui
 
