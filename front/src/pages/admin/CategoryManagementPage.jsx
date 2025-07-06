@@ -83,7 +83,7 @@ const CategoryManagementPage = () => {
         <div className="rounded-t bg-white dark:bg-zinc-700 mb-0 px-6 py-6">
           <div className="text-center flex justify-between">
             <h6 className="text-gray-800 dark:text-gray-100 text-xl font-bold">Gerenciamento de Categorias</h6>
-            <BackButton to="/admin" />
+            <BackButton />
           </div>
         </div>
         <div className="flex-auto px-4 lg:px-10 py-10 pt-0">

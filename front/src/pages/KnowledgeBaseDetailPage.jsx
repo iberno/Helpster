@@ -70,7 +70,7 @@ const KnowledgeBaseDetailPage = () => {
         <div className="rounded-t mb-0 px-6 py-6 border-b border-gray-200 dark:bg-zinc-700 dark:border-zinc-600">
           <div className="flex justify-between items-center">
             <h3 className="font-semibold text-xl text-gray-800 dark:text-gray-100">{article.title}</h3>
-            <BackButton to="/knowledge-base" />
+            <BackButton />
           </div>
         </div>
         <div className="flex-auto p-6">

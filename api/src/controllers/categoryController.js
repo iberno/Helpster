@@ -1,5 +1,5 @@
 const asyncHandler = require('express-async-handler');
-const { pool } = require('../config/database');
+const Category = require('../models/Category'); // Importa o modelo Category
 
 // @desc    Criar uma nova categoria
 // @route   POST /api/categories
@@ -12,20 +12,17 @@ const createCategory = asyncHandler(async (req, res) => {
     throw new Error('O nome da categoria é obrigatório.');
   }
 
-  const { rows } = await pool.query(
-    'INSERT INTO categories (name, description) VALUES ($1, $2) RETURNING *',
-    [name, description]
-  );
+  const newCategory = await Category.create(name, description);
 
-  res.status(201).json(rows[0]);
+  res.status(201).json(newCategory);
 });
 
 // @desc    Listar todas as categorias
 // @route   GET /api/categories
 // @access  Privado (Autenticado)
 const getAllCategories = asyncHandler(async (req, res) => {
-  const { rows } = await pool.query('SELECT * FROM categories ORDER BY name ASC');
-  res.status(200).json(rows);
+  const categories = await Category.findAll();
+  res.status(200).json(categories);
 });
 
 // @desc    Obter uma categoria por ID
@@ -33,14 +30,14 @@ const getAllCategories = asyncHandler(async (req, res) => {
 // @access  Privado (Autenticado)
 const getCategoryById = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { rows } = await pool.query('SELECT * FROM categories WHERE id = $1', [id]);
+  const category = await Category.findById(id);
 
-  if (rows.length === 0) {
+  if (!category) {
     res.status(404);
     throw new Error('Categoria não encontrada.');
   }
 
-  res.status(200).json(rows[0]);
+  res.status(200).json(category);
 });
 
 // @desc    Atualizar uma categoria
@@ -50,17 +47,14 @@ const updateCategory = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { name, description } = req.body;
 
-  const { rows } = await pool.query(
-    'UPDATE categories SET name = $1, description = $2 WHERE id = $3 RETURNING *',
-    [name, description, id]
-  );
+  const updatedCategory = await Category.update(id, name, description);
 
-  if (rows.length === 0) {
+  if (!updatedCategory) {
     res.status(404);
     throw new Error('Categoria não encontrada.');
   }
 
-  res.status(200).json(rows[0]);
+  res.status(200).json(updatedCategory);
 });
 
 // @desc    Deletar uma categoria
@@ -69,7 +63,7 @@ const updateCategory = asyncHandler(async (req, res) => {
 const deleteCategory = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const { rowCount } = await pool.query('DELETE FROM categories WHERE id = $1', [id]);
+  const rowCount = await Category.delete(id);
 
   if (rowCount === 0) {
     res.status(404);

@@ -93,8 +93,8 @@ const RoleManagementPage = () => {
 
   const handleToggleActiveStatus = async (roleToToggle) => {
     try {
-      const updatedRole = await roleService.toggleRoleActiveStatus(token, roleToToggle.id, { is_active: !roleToToggle.is_active });
-      setRoles(roles.map(role => role.id === updatedRole.id ? updatedRole : role));
+      const updatedRole = await roleService.toggleRoleActiveStatus(token, roleToToggle.id, !roleToToggle.is_active);
+      setRoles(roles.map(role => role.id === updatedRole.id ? { ...role, ...updatedRole } : role));
       showAlert(`Perfil ${updatedRole.is_active ? 'ativado' : 'desativado'} com sucesso!`, 'success');
     } catch (error) {
       console.error('Failed to toggle role status:', error);
@@ -135,7 +135,7 @@ const RoleManagementPage = () => {
         <div className="rounded-t bg-white dark:bg-zinc-700 mb-0 px-6 py-6">
           <div className="text-center flex justify-between">
             <h6 className="text-gray-800 dark:text-gray-100 text-xl font-bold">Gerenciamento de Perfis</h6>
-            <BackButton to="/admin" />
+            <BackButton />
           </div>
         </div>
         <div className="flex-auto px-4 lg:px-10 py-10 pt-0">
@@ -213,7 +213,7 @@ const RoleManagementPage = () => {
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 dark:border-zinc-700">{role.name}</td>
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 dark:border-zinc-700">
                     <ul className="list-disc list-inside">
-                      {role.permissions.map((p) => (
+                      {(role.permissions || []).map((p) => (
                         <li key={p} className="text-gray-700 dark:text-gray-200">{allPermissions.find(perm => perm.name === p)?.description || p}</li>
                       ))}
                     </ul>

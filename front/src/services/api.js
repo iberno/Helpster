@@ -13,7 +13,15 @@ const api = {
 
     let url = `${API_URL}${endpoint}`;
     if (queryParams) {
-      const params = new URLSearchParams(queryParams);
+      const processedQueryParams = {};
+      for (const key in queryParams) {
+        if (Array.isArray(queryParams[key])) {
+          processedQueryParams[key] = queryParams[key].join(',');
+        } else {
+          processedQueryParams[key] = queryParams[key];
+        }
+      }
+      const params = new URLSearchParams(processedQueryParams);
       url = `${url}?${params.toString()}`;
     }
 

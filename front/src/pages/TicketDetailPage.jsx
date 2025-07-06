@@ -110,7 +110,7 @@ const TicketDetailPage = () => {
         <div className="rounded-t bg-white dark:bg-zinc-800 mb-0 px-6 py-6">
           <div className="text-center flex justify-between">
             <h6 className="text-gray-800 dark:text-gray-100 text-xl font-bold">Detalhes do Ticket #{ticket.id}</h6>
-            <BackButton to="/tickets" />
+            <BackButton />
           </div>
         </div>
         <div className="flex-auto px-4 lg:px-10 py-10 pt-0">
@@ -144,13 +144,13 @@ const TicketDetailPage = () => {
               <div className="relative w-full mb-3">
                 <label className="block uppercase text-gray-600 dark:text-gray-300 text-xs font-bold mb-2">Status</label>
                 {user && hasPermission('tickets:update') ? (
-                  <select value={ticket.status} onChange={(e) => handleUpdateTicket('status', e.target.value)} className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150">
+                  <select value={ticket.status_id} onChange={(e) => handleUpdateTicket('status_id', e.target.value)} className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150">
                     {statuses.map(s => (
-                      <option key={s} value={s}>{s}</option>
+                      <option key={s.id} value={s.id}>{s.name}</option>
                     ))}
                   </select>
                 ) : (
-                  <p className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow w-full">{ticket.status}</p>
+                  <p className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow w-full">{ticket.status_name}</p>
                 )}
               </div>
             </div>
@@ -158,13 +158,13 @@ const TicketDetailPage = () => {
               <div className="relative w-full mb-3">
                 <label className="block uppercase text-gray-600 dark:text-gray-300 text-xs font-bold mb-2">Prioridade</label>
                 {user && hasPermission('tickets:update') ? (
-                  <select value={ticket.priority} onChange={(e) => handleUpdateTicket('priority', e.target.value)} className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150">
+                  <select value={ticket.priority_id} onChange={(e) => handleUpdateTicket('priority_id', e.target.value)} className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150">
                     {priorities.map(p => (
-                      <option key={p} value={p}>{p}</option>
+                      <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
                   </select>
                 ) : (
-                  <p className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow w-full">{ticket.priority}</p>
+                  <p className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow w-full">{ticket.priority_name}</p>
                 )}
               </div>
             </div>
@@ -172,13 +172,13 @@ const TicketDetailPage = () => {
               <div className="relative w-full mb-3">
                 <label className="block uppercase text-gray-600 dark:text-gray-300 text-xs font-bold mb-2">Nível de Suporte</label>
                 {user && hasPermission('tickets:update') ? (
-                  <select value={ticket.support_level} onChange={(e) => handleUpdateTicket('support_level', e.target.value)} className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150">
+                  <select value={ticket.service_level_id} onChange={(e) => handleUpdateTicket('service_level_id', e.target.value)} className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150">
                     {supportLevels.map(sl => (
-                      <option key={sl} value={sl}>{sl}</option>
+                      <option key={sl.id} value={sl.id}>{sl.name}</option>
                     ))}
                   </select>
                 ) : (
-                  <p className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow w-full">{ticket.support_level}</p>
+                  <p className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow w-full">{ticket.service_level_name}</p>
                 )}
               </div>
             </div>

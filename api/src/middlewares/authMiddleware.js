@@ -36,7 +36,7 @@ const authorizeRole = (allowedRoles) => {
     }
 
     const userRole = req.user.role;
-    console.log(`Authorize Role: User Role = ${userRole}, Allowed Roles = ${allowedRoles}`);
+    console.log(`Authorize Role: User Role = ${userRole}, Allowed Roles = ${allowedRoles}, Path = ${req.path}`);
 
     if (!allowedRoles.includes(userRole)) {
       return res.status(403).json({ message: 'Acesso proibido. Você não tem permissão para acessar este recurso.' });

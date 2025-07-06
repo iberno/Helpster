@@ -99,7 +99,7 @@ const KnowledgeBaseFormPage = () => {
         <div className="rounded-t bg-white mb-0 px-6 py-6">
           <div className="text-center flex justify-between">
             <h6 className="text-blueGray-700 text-xl font-bold">{isEditing ? 'Editar Artigo' : 'Criar Novo Artigo'}</h6>
-            <BackButton to="/knowledge-base" />
+            <BackButton />
           </div>
         </div>
         <div className="flex-auto px-4 lg:px-10 py-10 pt-0">

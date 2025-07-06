@@ -1,32 +1,24 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { pool } = require('../config/database');
+const asyncHandler = require('express-async-handler');
+const User = require('../models/User'); // Importa o modelo User
+const Role = require('../models/Role'); // Importa o modelo Role
 require('dotenv').config();
 
-const asyncHandler = require('express-async-handler');
-
 const register = asyncHandler(async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role: roleNameFromReq } = req.body;
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
   try {
-    const newUserResult = await pool.query(
-      'INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role, is_active',
-      [name, email, hashedPassword, role || 'user']
-    );
-    const newUser = newUserResult.rows[0];
+    // A role padrão é 'user' se não for fornecida na requisição
+    const roleToAssign = roleNameFromReq || 'user';
 
-    // Buscar as permissões do novo usuário
-    const permissionsResult = await pool.query(
-      `SELECT p.name FROM permissions p
-       JOIN role_permissions rp ON p.id = rp.permission_id
-       JOIN roles r ON rp.role_id = r.id
-       WHERE r.name = $1`,
-      [newUser.role]
-    );
-    const permissions = permissionsResult.rows.map(row => row.name);
+    const newUser = await User.create(name, email, hashedPassword, roleToAssign, null); // service_level_id é null por padrão no registro
+
+    // Buscar as permissões do novo usuário através do modelo Role
+    const permissions = await Role.getPermissionsByRoleName(newUser.role);
 
     const payload = {
       id: newUser.id,
@@ -49,14 +41,12 @@ const register = asyncHandler(async (req, res) => {
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  const userResult = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+  const user = await User.findByEmail(email);
 
-  if (userResult.rows.length === 0) {
+  if (!user) {
     res.status(401);
     throw new Error('Credenciais inválidas.');
   }
-
-  const user = userResult.rows[0];
 
   const isMatch = await bcrypt.compare(password, user.password);
 
@@ -65,15 +55,8 @@ const login = asyncHandler(async (req, res) => {
     throw new Error('Credenciais inválidas.');
   }
 
-  // Buscar as permissões do usuário
-  const permissionsResult = await pool.query(
-    `SELECT p.name FROM permissions p
-     JOIN role_permissions rp ON p.id = rp.permission_id
-     JOIN roles r ON rp.role_id = r.id
-     WHERE r.name = $1`,
-    [user.role]
-  );
-  const permissions = permissionsResult.rows.map(row => row.name);
+  // Buscar as permissões do usuário através do modelo Role
+  const permissions = await Role.getPermissionsByRoleName(user.role);
 
   const payload = {
     id: user.id,

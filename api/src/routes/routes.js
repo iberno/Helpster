@@ -62,13 +62,6 @@ router.route('/tickets/mytickets')
   .get(authenticateToken, getMyTickets);
 
 
-router.route('/tickets/:id')
-  .get(authenticateToken, authorizeRole(['admin', 'manager', 'agent']), getTicketById)
-  .put(authenticateToken, authorizeRole(['admin', 'manager', 'agent']), updateTicket);
-
-router.route('/tickets/:id/comments')
-  .post(authenticateToken, addCommentToTicket);
-
 router.route('/tickets/statuses')
   .get(authenticateToken, authorizeRole(['admin', 'manager', 'agent']), getTicketStatuses);
 
@@ -77,6 +70,13 @@ router.route('/tickets/priorities')
 
 router.route('/tickets/support-levels')
   .get(authenticateToken, authorizeRole(['admin', 'manager', 'agent']), getTicketSupportLevels);
+
+router.route('/tickets/:id')
+  .get(authenticateToken, getTicketById)
+  .put(authenticateToken, authorizeRole(['admin', 'manager', 'agent']), updateTicket);
+
+router.route('/tickets/:id/comments')
+  .post(authenticateToken, addCommentToTicket);
 
 // Rotas de Usuários
 router.route('/users')

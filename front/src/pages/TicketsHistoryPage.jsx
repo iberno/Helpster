@@ -5,7 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid';
 
-const TicketListPage = () => {
+const TicketsHistoryPage = () => {
   const { user, token, logout, hasPermission } = useAuth();
   const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
@@ -18,7 +18,7 @@ const TicketListPage = () => {
   const [sortField, setSortField] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('desc');
 
-const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -28,59 +28,60 @@ const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
     return () => {
       clearTimeout(handler); // limpa o timeout se o usuário digitar novamente
     };
-}, [searchTerm]);
-const fetchTickets = useCallback(async () => {
-  try {
-    let response = { tickets: [], total: 0 };
-    const params = {
-      page: currentPage,
-      limit: ticketsPerPage,
-      search: debouncedSearchTerm,
-      sortField,
-      sortOrder,
-      statusNames: ['Aberto', 'Em Andamento', 'Aguardando Cliente'], // Exclui Fechado e Cancelado
-    };
+  }, [searchTerm]);
 
-    if (hasPermission('tickets:read_all')) {
-      response = await ticketService.getAllTickets(token, params);
-    } else if (hasPermission('tickets:read_own')) {
-      response = await ticketService.getMyTickets(token, params);
-    } else {
-      setError('Você não tem permissão para visualizar tickets.');
+  const fetchTickets = useCallback(async () => {
+    try {
+      let response = { tickets: [], total: 0 };
+      const params = {
+        page: currentPage,
+        limit: ticketsPerPage,
+        search: debouncedSearchTerm,
+        sortField,
+        sortOrder,
+        statusNames: ['Fechado', 'Cancelado'], // Filtro para tickets fechados e cancelados
+      };
+
+      if (hasPermission('tickets:read_all')) {
+        response = await ticketService.getAllTickets(token, params);
+      } else if (hasPermission('tickets:read_own')) {
+        response = await ticketService.getMyTickets(token, params);
+      } else {
+        setError('Você não tem permissão para visualizar tickets.');
+        setLoading(false);
+        return;
+      }
+
+      setTickets(Array.isArray(response.tickets) ? response.tickets : []);
+      setTotalTickets(typeof response.total === 'number' ? response.total : 0);
+    } catch (err) {
+      console.error('Erro ao buscar tickets:', err);
+      setError(err.message || 'Erro ao carregar tickets.');
+      if (err.message === 'Token inválido ou expirado.') {
+        logout();
+        navigate('/login');
+      }
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setTickets(Array.isArray(response.tickets) ? response.tickets : []);
-    setTotalTickets(typeof response.total === 'number' ? response.total : 0);
-  } catch (err) {
-    console.error('Erro ao buscar tickets:', err);
-    setError(err.message || 'Erro ao carregar tickets.');
-    if (err.message === 'Token inválido ou expirado.') {
-      logout();
-      navigate('/login');
-    }
-  } finally {
-    setLoading(false);
-  }
-}, [
-  currentPage,
-  ticketsPerPage,
-  debouncedSearchTerm,
-  sortField,
-  sortOrder,
-  user,
-  token,
-  logout,
-  navigate,
-]);
+  }, [
+    currentPage,
+    ticketsPerPage,
+    debouncedSearchTerm,
+    sortField,
+    sortOrder,
+    user,
+    token,
+    logout,
+    navigate,
+    hasPermission,
+  ]);
 
   useEffect(() => {
     if (token && user) {
       fetchTickets();
     }
   }, [token, user, fetchTickets]);
-
 
   const handleSort = (field) => {
     const order = (sortField === field && sortOrder === 'asc') ? 'desc' : 'asc';
@@ -120,14 +121,7 @@ const fetchTickets = useCallback(async () => {
         <div className="rounded-t mb-0 px-4 py-3 border-0 bg-gray-50 dark:bg-zinc-700">
           <div className="flex flex-wrap items-center">
             <div className="relative w-full px-4 max-w-full flex-grow flex-1">
-              <h3 className="font-semibold text-base text-gray-800 dark:text-gray-100">Meus Tickets</h3>
-            </div>
-            <div className="relative w-full px-4 max-w-full flex-grow flex-1 text-right">
-              {(user?.role === 'user' || user?.role === 'admin' || user?.role === 'manager') && (
-                <Link to="/tickets/new" className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg text-sm transition duration-200">
-                  Abrir Novo Ticket
-                </Link>
-              )}
+              <h3 className="font-semibold text-base text-gray-800 dark:text-gray-100">Histórico de Tickets</h3>
             </div>
           </div>
           <div className="mt-4">
@@ -215,4 +209,4 @@ const fetchTickets = useCallback(async () => {
   );
 };
 
-export default TicketListPage;
+export default TicketsHistoryPage;

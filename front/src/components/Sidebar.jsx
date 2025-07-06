@@ -24,10 +24,16 @@ const Sidebar = ({ isSidebarOpen }) => {
           </NavLink>
         )}
         {user && (hasPermission('tickets:read_all') || hasPermission('tickets:read_own')) && (
-          <NavLink to="/tickets" className={({ isActive }) => `flex items-center py-2.5 px-4 rounded transition duration-200 text-gray-700 dark:text-gray-300 ${isActive ? activeLink : normalLink} ${isSidebarOpen ? 'justify-start' : 'justify-center'}`}>
-            <TicketIcon className={`h-6 w-6 ${isSidebarOpen ? 'mr-3' : ''}`} /> 
-            <span className={`${isSidebarOpen ? '' : 'hidden'}`}>Tickets</span>
-          </NavLink>
+          <>
+            <NavLink to="/tickets" className={({ isActive }) => `flex items-center py-2.5 px-4 rounded transition duration-200 text-gray-700 dark:text-gray-300 ${isActive ? activeLink : normalLink} ${isSidebarOpen ? 'justify-start' : 'justify-center'}`}>
+              <TicketIcon className={`h-6 w-6 ${isSidebarOpen ? 'mr-3' : ''}`} /> 
+              <span className={`${isSidebarOpen ? '' : 'hidden'}`}>Tickets Ativos</span>
+            </NavLink>
+            <NavLink to="/tickets/history" className={({ isActive }) => `flex items-center py-2.5 px-4 rounded transition duration-200 text-gray-700 dark:text-gray-300 ${isActive ? activeLink : normalLink} ${isSidebarOpen ? 'justify-start' : 'justify-center'}`}>
+              <TicketIcon className={`h-6 w-6 ${isSidebarOpen ? 'mr-3' : ''}`} /> 
+              <span className={`${isSidebarOpen ? '' : 'hidden'}`}>Histórico de Tickets</span>
+            </NavLink>
+          </>
         )}
         {user && hasPermission('knowledge_base:view') && (
           <NavLink to="/knowledge-base" className={({ isActive }) => `flex items-center py-2.5 px-4 rounded transition duration-200 text-gray-700 dark:text-gray-300 ${isActive ? activeLink : normalLink} ${isSidebarOpen ? 'justify-start' : 'justify-center'}`}>
