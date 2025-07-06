@@ -25,7 +25,7 @@ const Sidebar = ({ isSidebarOpen }) => {
         )}
         {user && (hasPermission('tickets:read_all') || hasPermission('tickets:read_own')) && (
           <>
-            <NavLink to="/tickets" className={({ isActive }) => `flex items-center py-2.5 px-4 rounded transition duration-200 text-gray-700 dark:text-gray-300 ${isActive ? activeLink : normalLink} ${isSidebarOpen ? 'justify-start' : 'justify-center'}`}>
+            <NavLink to="/tickets" end className={({ isActive }) => `flex items-center py-2.5 px-4 rounded transition duration-200 text-gray-700 dark:text-gray-300 ${isActive ? activeLink : normalLink} ${isSidebarOpen ? 'justify-start' : 'justify-center'}`}>
               <TicketIcon className={`h-6 w-6 ${isSidebarOpen ? 'mr-3' : ''}`} /> 
               <span className={`${isSidebarOpen ? '' : 'hidden'}`}>Tickets Ativos</span>
             </NavLink>
@@ -42,7 +42,7 @@ const Sidebar = ({ isSidebarOpen }) => {
           </NavLink>
         )}
         {user && hasPermission('users:manage') && (
-          <NavLink to="/admin" className={({ isActive }) => `flex items-center py-2.5 px-4 rounded transition duration-200 text-gray-700 dark:text-gray-300 ${isActive ? activeLink : normalLink} ${isSidebarOpen ? 'justify-start' : 'justify-center'}`}>
+          <NavLink to="/admin" end className={({ isActive }) => `flex items-center py-2.5 px-4 rounded transition duration-200 text-gray-700 dark:text-gray-300 ${isActive ? activeLink : normalLink} ${isSidebarOpen ? 'justify-start' : 'justify-center'}`}>
             <UserGroupIcon className={`h-6 w-6 ${isSidebarOpen ? 'mr-3' : ''}`} /> 
             <span className={`${isSidebarOpen ? '' : 'hidden'}`}>Admin</span>
           </NavLink>
