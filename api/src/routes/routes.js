@@ -4,8 +4,8 @@ const { authenticateToken, authorizeRole } = require('../middlewares/authMiddlew
 const { register, login } = require('../controllers/authController');
 const { validate, registerSchema, loginSchema } = require('../validators/authValidator');
 const { createCategory, getAllCategories, getCategoryById, updateCategory, deleteCategory } = require('../controllers/categoryController');
-const { createTicket, getAllTickets, getMyTickets, getTicketById, updateTicket, addCommentToTicket } = require('../controllers/ticketController');
-const { getAllUsers, createUser } = require('../controllers/userController');
+const { createTicket, getAllTickets, getMyTickets, getTicketById, updateTicket, addCommentToTicket, getTicketStatuses, getTicketPriorities, getTicketSupportLevels } = require('../controllers/ticketController');
+const { getAllUsers, createUser, updateUser, getAgents } = require('../controllers/userController');
 const { uploadKbImage, upload } = require('../controllers/uploadController');
 const { createArticle, getAllArticles, getArticleById, updateArticle, deleteArticle } = require('../controllers/knowledgeBaseController');
 const {
@@ -14,6 +14,8 @@ const {
   getAllRoles,
   updateRolePermissions,
   deleteRole,
+  updateRole,
+  toggleRoleActiveStatus,
 } = require('../controllers/rolePermissionController');
 
 // Rotas de Autenticação
@@ -54,27 +56,38 @@ router.route('/categories/:id')
 // Rotas de Tickets
 router.route('/tickets')
   .post(authenticateToken, createTicket)
-  .get(authenticateToken, authorizeRole(['admin', 'manager']), getAllTickets);
+  .get(authenticateToken, authorizeRole(['admin', 'manager', 'agent']), getAllTickets);
 
 router.route('/tickets/mytickets')
   .get(authenticateToken, getMyTickets);
-
-router.route('/tickets/mytickets')
-  .get(authenticateToken, getMyTickets);
-
 
 
 router.route('/tickets/:id')
-  .get(authenticateToken, getTicketById)
-  .put(authenticateToken, authorizeRole(['admin', 'manager']), updateTicket);
+  .get(authenticateToken, authorizeRole(['admin', 'manager', 'agent']), getTicketById)
+  .put(authenticateToken, authorizeRole(['admin', 'manager', 'agent']), updateTicket);
 
 router.route('/tickets/:id/comments')
   .post(authenticateToken, addCommentToTicket);
+
+router.route('/tickets/statuses')
+  .get(authenticateToken, authorizeRole(['admin', 'manager', 'agent']), getTicketStatuses);
+
+router.route('/tickets/priorities')
+  .get(authenticateToken, authorizeRole(['admin', 'manager', 'agent']), getTicketPriorities);
+
+router.route('/tickets/support-levels')
+  .get(authenticateToken, authorizeRole(['admin', 'manager', 'agent']), getTicketSupportLevels);
 
 // Rotas de Usuários
 router.route('/users')
   .post(authenticateToken, authorizeRole(['admin']), createUser)
   .get(authenticateToken, authorizeRole(['admin']), getAllUsers);
+
+router.route('/users/:id')
+  .put(authenticateToken, authorizeRole(['admin']), updateUser);
+
+router.route('/users/agents')
+  .get(authenticateToken, authorizeRole(['admin', 'manager', 'agent']), getAgents);
 
 // Rotas de Upload de Imagens para KB
 router.post('/kb/upload-image', authenticateToken, authorizeRole(['admin', 'manager']), upload.single('image'), uploadKbImage);
@@ -89,7 +102,11 @@ router.route('/roles')
   .get(authenticateToken, authorizeRole(['admin']), getAllRoles);
 
 router.route('/roles/:id')
+  .put(authenticateToken, authorizeRole(['admin']), updateRole)
   .delete(authenticateToken, authorizeRole(['admin']), deleteRole);
+
+router.route('/roles/:id/toggle-active')
+  .put(authenticateToken, authorizeRole(['admin']), toggleRoleActiveStatus);
 
 router.route('/roles/:id/permissions')
   .put(authenticateToken, authorizeRole(['admin']), updateRolePermissions);

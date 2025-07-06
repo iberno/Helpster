@@ -1,96 +1,29 @@
-const API_URL = 'http://localhost:3000/api';
+import api from './api';
 
 const uploadKbImage = async (token, imageFile) => {
   const formData = new FormData();
   formData.append('image', imageFile);
-
-  const response = await fetch(`${API_URL}/kb/upload-image`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-    body: formData,
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao fazer upload da imagem');
-  }
-  return data;
+  return api.post('/kb/upload-image', token, formData);
 };
 
 const createArticle = async (token, articleData) => {
-  const response = await fetch(`${API_URL}/kb/articles`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify(articleData),
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao criar artigo');
-  }
-  return data;
+  return api.post('/kb/articles', token, articleData);
 };
 
 const getAllArticles = async (token) => {
-  const response = await fetch(`${API_URL}/kb/articles`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao buscar artigos');
-  }
-  return data;
+  return api.get('/kb/articles', token);
 };
 
 const getArticleById = async (token, id, signal) => {
-  const response = await fetch(`${API_URL}/kb/articles/${id}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-    signal, // Pass the signal to the fetch request
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao buscar artigo');
-  }
-  return data;
+  return api.get(`/kb/articles/${id}`, token, null, signal);
 };
 
 const updateArticle = async (token, id, articleData) => {
-  const response = await fetch(`${API_URL}/kb/articles/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify(articleData),
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao atualizar artigo');
-  }
-  return data;
+  return api.put(`/kb/articles/${id}`, token, articleData);
 };
 
 const deleteArticle = async (token, id) => {
-  const response = await fetch(`${API_URL}/kb/articles/${id}`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao deletar artigo');
-  }
-  return data;
+  return api.delete(`/kb/articles/${id}`, token);
 };
 
 export default {

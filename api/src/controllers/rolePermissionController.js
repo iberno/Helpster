@@ -114,10 +114,80 @@ const deleteRole = asyncHandler(async (req, res) => {
   res.status(200).json({ message: 'Perfil deletado com sucesso.' });
 });
 
+// @desc    Atualizar um perfil (role)
+// @route   PUT /api/roles/:id
+// @access  Privado (Admin)
+const updateRole = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { name, permissions } = req.body;
+
+  // Verificar se o perfil existe
+  const roleExists = await pool.query('SELECT id FROM roles WHERE id = $1', [id]);
+  if (roleExists.rows.length === 0) {
+    res.status(404);
+    throw new Error('Perfil não encontrado.');
+  }
+
+  // Atualizar o nome do perfil
+  await pool.query('UPDATE roles SET name = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [name, id]);
+
+  // Remover permissões antigas
+  await pool.query('DELETE FROM role_permissions WHERE role_id = $1', [id]);
+
+  // Adicionar novas permissões, se houver
+  if (permissions && permissions.length > 0) {
+    const values = permissions.map(permId => `(${id}, ${permId})`).join(',');
+    await pool.query(
+      `INSERT INTO role_permissions (role_id, permission_id) VALUES ${values}`
+    );
+  }
+
+  const updatedRole = await pool.query(
+    `SELECT
+      r.id,
+      r.name,
+      r.is_active,
+      COALESCE(json_agg(p.name) FILTER (WHERE p.id IS NOT NULL), '[]') AS permissions
+    FROM roles r
+    LEFT JOIN role_permissions rp ON r.id = rp.role_id
+    LEFT JOIN permissions p ON rp.permission_id = p.id
+    WHERE r.id = $1
+    GROUP BY r.id, r.name, r.is_active;`,
+    [id]
+  );
+
+  res.status(200).json(updatedRole.rows[0]);
+});
+
+// @desc    Alternar o status de ativo/inativo de um perfil (role)
+// @route   PUT /api/roles/:id/toggle-active
+// @access  Privado (Admin)
+const toggleRoleActiveStatus = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { is_active } = req.body;
+
+  // Verificar se o perfil existe
+  const roleExists = await pool.query('SELECT id FROM roles WHERE id = $1', [id]);
+  if (roleExists.rows.length === 0) {
+    res.status(404);
+    throw new Error('Perfil não encontrado.');
+  }
+
+  // Atualizar o status is_active
+  const updatedRole = await pool.query(
+    'UPDATE roles SET is_active = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING id, name, is_active',
+    [is_active, id]
+  );
+
+  res.status(200).json(updatedRole.rows[0]);
+});
+
 module.exports = {
   getAllPermissions,
   createRole,
   getAllRoles,
   updateRolePermissions,
   deleteRole,
+  updateRole,
+  toggleRoleActiveStatus,
 };

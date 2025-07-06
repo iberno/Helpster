@@ -9,8 +9,10 @@ const useAuth = () => {
     if (token) {
       try {
         const decodedUser = jwtDecode(token);
+        // O backend agora retorna o objeto user completo no login/registro
+        // Então, o user do token deve ser o objeto user completo, incluindo permissões
         setUser(decodedUser);
-        console.log("Usuário decodificado:", decodedUser);
+        // console.log("Usuário decodificado:", decodedUser);
       } catch (error) {
         console.error("Erro ao decodificar o token:", error);
         logout();
@@ -20,9 +22,10 @@ const useAuth = () => {
     }
   }, [token]);
 
-  const login = (newToken) => {
+  const login = (newToken, userData) => {
     localStorage.setItem('token', newToken);
     setToken(newToken);
+    setUser(userData); // Definir o objeto user completo aqui
   };
 
   const logout = (onLogoutSuccess) => {
@@ -34,7 +37,11 @@ const useAuth = () => {
     }
   };
 
-  return { token, user, login, logout };
+  const hasPermission = (permissionName) => {
+    return user && user.permissions && user.permissions.includes(permissionName);
+  };
+
+  return { token, user, login, logout, hasPermission };
 };
 
 export default useAuth;

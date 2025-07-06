@@ -1,32 +1,11 @@
-const API_URL = 'http://localhost:3000/api'; // URL da API do Helpster
+import api from './api';
 
 const register = async (name, email, password, role) => {
-  const response = await fetch(`${API_URL}/auth/register`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ name, email, password, role }),
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao registrar');
-  }
-  return data;
+  return api.post('/auth/register', null, { name, email, password, role });
 };
 
 const login = async (email, password) => {
-  const response = await fetch(`${API_URL}/auth/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao fazer login');
-  }
+  const data = await api.post('/auth/login', null, { email, password });
   if (data.token) {
     localStorage.setItem('token', data.token);
   }
@@ -34,153 +13,54 @@ const login = async (email, password) => {
 };
 
 const getProtectedData = async (token) => {
-  const response = await fetch(`${API_URL}/protected`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao buscar dados protegidos');
-  }
-  return data;
+  return api.get('/protected', token);
 };
 
 const getAdminData = async (token) => {
-  const response = await fetch(`${API_URL}/admin`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao buscar dados de admin');
-  }
-  return data;
+  return api.get('/admin', token);
 };
 
 const getManagerData = async (token) => {
-  const response = await fetch(`${API_URL}/manager-area`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao buscar dados de gerente');
-  }
-  return data;
+  return api.get('/manager-area', token);
 };
 
-// Mocked user and role management functions
 const getUsers = async (token) => {
-  const response = await fetch(`${API_URL}/users`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Falha ao buscar usuários');
-  }
-  return data;
+  const response = await api.get('/users', token);
+  return response;
 };
 
 const getAllPermissions = async (token) => {
-  const response = await fetch(`${API_URL}/permissions`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Falha ao buscar permissões');
-  }
-  return data;
+  return api.get('/permissions', token);
 };
 
 const getAllRoles = async (token) => {
-  const response = await fetch(`${API_URL}/roles`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Falha ao buscar perfis');
-  }
-  return data;
+  return api.get('/roles', token);
 };
 
 const createRole = async (token, roleData) => {
-  const response = await fetch(`${API_URL}/roles`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify(roleData),
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Falha ao criar perfil');
-  }
-  return data;
+  return api.post('/roles', token, roleData);
 };
 
 const updateRolePermissions = async (token, roleId, permissions) => {
-  const response = await fetch(`${API_URL}/roles/${roleId}/permissions`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify({ permissions }),
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Falha ao atualizar permissões do perfil');
-  }
-  return data;
+  return api.put(`/roles/${roleId}/permissions`, token, { permissions });
 };
 
 const deleteRole = async (token, roleId) => {
-  const response = await fetch(`${API_URL}/roles/${roleId}`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Falha ao deletar perfil');
-  }
-  return data;
+  return api.delete(`/roles/${roleId}`, token);
 };
 
 const createUser = async (token, userData) => {
-  const response = await fetch(`${API_URL}/users`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(userData),
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Falha ao criar usuário');
-  }
-  return data;
+  const response = await api.post('/users', token, userData);
+  return response;
+};
+
+const updateUser = async (token, userId, userData) => {
+  const response = await api.put(`/users/${userId}`, token, userData);
+  return response;
+};
+
+const getAgents = async (token) => {
+  return api.get('/users/agents', token);
 };
 
 export default {
@@ -196,4 +76,6 @@ export default {
   updateRolePermissions,
   deleteRole,
   createUser,
+  updateUser,
+  getAgents,
 };

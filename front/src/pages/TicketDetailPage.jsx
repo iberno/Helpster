@@ -2,22 +2,27 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import ticketService from '../services/ticketService';
+import authService from '../services/authService'; // Importar authService
 import BackButton from '../components/BackButton';
 import { useAlert } from '../contexts/AlertContext';
 
 const TicketDetailPage = () => {
   const { id } = useParams();
-  const { user, token, logout } = useAuth();
+  const { user, token, logout, hasPermission } = useAuth();
   const navigate = useNavigate();
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [newComment, setNewComment] = useState('');
   const [commentVisibility, setCommentVisibility] = useState('Público');
+  const [agents, setAgents] = useState([]); // Novo estado para armazenar agentes
+  const [statuses, setStatuses] = useState([]); // Novo estado para armazenar status
+  const [priorities, setPriorities] = useState([]); // Novo estado para armazenar prioridades
+  const [supportLevels, setSupportLevels] = useState([]); // Novo estado para armazenar níveis de suporte
   const { showAlert } = useAlert();
 
   useEffect(() => {
-    const fetchTicket = async () => {
+    const fetchTicketAndOptions = async () => {
       if (!token) {
         navigate('/login');
         return;
@@ -25,9 +30,22 @@ const TicketDetailPage = () => {
       try {
         const fetchedTicket = await ticketService.getTicketById(token, id);
         setTicket(fetchedTicket);
+
+        const fetchedAgents = await authService.getAgents(token);
+        setAgents(fetchedAgents);
+
+        const fetchedStatuses = await ticketService.getTicketStatuses(token);
+        setStatuses(fetchedStatuses);
+
+        const fetchedPriorities = await ticketService.getTicketPriorities(token);
+        setPriorities(fetchedPriorities);
+
+        const fetchedSupportLevels = await ticketService.getTicketSupportLevels(token);
+        setSupportLevels(fetchedSupportLevels);
+
       } catch (err) {
-        console.error('Erro ao buscar ticket:', err);
-        setError(err.message || 'Erro ao carregar ticket.');
+        console.error('Erro ao buscar dados:', err);
+        setError(err.message || 'Erro ao carregar dados.');
         if (err.message === 'Token inválido ou expirado.') {
           logout();
           navigate('/login');
@@ -37,8 +55,8 @@ const TicketDetailPage = () => {
       }
     };
 
-    fetchTicket();
-  }, [id, token, navigate, logout]);
+    fetchTicketAndOptions();
+  }, [id, token, navigate, logout, hasPermission]);
 
   const handleAddComment = async (e) => {
     e.preventDefault();
@@ -89,7 +107,7 @@ const TicketDetailPage = () => {
   return (
     <div className="w-full px-4">
       <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-white dark:bg-zinc-800 dark:text-gray-100 border-0">
-        <div className="rounded-t bg-white dark:bg-zinc-700 mb-0 px-6 py-6">
+        <div className="rounded-t bg-white dark:bg-zinc-800 mb-0 px-6 py-6">
           <div className="text-center flex justify-between">
             <h6 className="text-gray-800 dark:text-gray-100 text-xl font-bold">Detalhes do Ticket #{ticket.id}</h6>
             <BackButton to="/tickets" />
@@ -125,13 +143,11 @@ const TicketDetailPage = () => {
             <div className="w-full lg:w-4/12 px-4">
               <div className="relative w-full mb-3">
                 <label className="block uppercase text-gray-600 dark:text-gray-300 text-xs font-bold mb-2">Status</label>
-                {isAgentOrAdmin ? (
+                {user && hasPermission('tickets:update') ? (
                   <select value={ticket.status} onChange={(e) => handleUpdateTicket('status', e.target.value)} className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150">
-                    <option value="Aberto">Aberto</option>
-                    <option value="Em Andamento">Em Andamento</option>
-                    <option value="Aguardando Cliente">Aguardando Cliente</option>
-                    <option value="Resolvido">Resolvido</option>
-                    <option value="Fechado">Fechado</option>
+                    {statuses.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
                   </select>
                 ) : (
                   <p className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow w-full">{ticket.status}</p>
@@ -141,12 +157,11 @@ const TicketDetailPage = () => {
             <div className="w-full lg:w-4/12 px-4">
               <div className="relative w-full mb-3">
                 <label className="block uppercase text-gray-600 dark:text-gray-300 text-xs font-bold mb-2">Prioridade</label>
-                {isAgentOrAdmin ? (
+                {user && hasPermission('tickets:update') ? (
                   <select value={ticket.priority} onChange={(e) => handleUpdateTicket('priority', e.target.value)} className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150">
-                    <option value="Baixa">Baixa</option>
-                    <option value="Média">Média</option>
-                    <option value="Alta">Alta</option>
-                    <option value="Urgente">Urgente</option>
+                    {priorities.map(p => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
                   </select>
                 ) : (
                   <p className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow w-full">{ticket.priority}</p>
@@ -156,24 +171,26 @@ const TicketDetailPage = () => {
             <div className="w-full lg:w-4/12 px-4">
               <div className="relative w-full mb-3">
                 <label className="block uppercase text-gray-600 dark:text-gray-300 text-xs font-bold mb-2">Nível de Suporte</label>
-                {isAgentOrAdmin ? (
+                {user && hasPermission('tickets:update') ? (
                   <select value={ticket.support_level} onChange={(e) => handleUpdateTicket('support_level', e.target.value)} className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150">
-                    <option value="N1">N1</option>
-                    <option value="N2">N2</option>
-                    <option value="N3">N3</option>
+                    {supportLevels.map(sl => (
+                      <option key={sl} value={sl}>{sl}</option>
+                    ))}
                   </select>
                 ) : (
                   <p className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow w-full">{ticket.support_level}</p>
                 )}
               </div>
             </div>
-            {isAgentOrAdmin && (
+            {user && hasPermission('tickets:assign') && (
               <div className="w-full lg:w-6/12 px-4">
                 <div className="relative w-full mb-3">
                   <label className="block uppercase text-gray-600 dark:text-gray-300 text-xs font-bold mb-2">Atribuir Agente</label>
                   <select value={ticket.agent_id || ''} onChange={(e) => handleUpdateTicket('agent_id', e.target.value || null)} className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150">
                     <option value="">Nenhum</option>
-                    <option value={user.id}>Atribuir a mim ({user.email})</option>
+                    {agents.map(agent => (
+                      <option key={agent.id} value={agent.id}>{agent.name} ({agent.email})</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -210,7 +227,7 @@ const TicketDetailPage = () => {
                   <textarea id="newComment" value={newComment} onChange={(e) => setNewComment(e.target.value)} className="border-0 px-3 py-3 placeholder-gray-300 text-gray-800 bg-gray-100 dark:bg-zinc-700 dark:text-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" rows="4" required></textarea>
                 </div>
               </div>
-              {isAgentOrAdmin && (
+              {user && hasPermission('comments:add_internal') && (
                 <div className="w-full lg:w-6/12 px-4">
                   <div className="relative w-full mb-3">
                     <label className="block uppercase text-gray-600 dark:text-gray-300 text-xs font-bold mb-2">Visibilidade</label>

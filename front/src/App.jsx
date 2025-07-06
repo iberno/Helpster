@@ -14,6 +14,7 @@ import TicketDetailPage from './pages/TicketDetailPage';
 import KnowledgeBaseListPage from './pages/KnowledgeBaseListPage';
 import KnowledgeBaseFormPage from './pages/admin/KnowledgeBaseFormPage';
 import KnowledgeBaseDetailPage from './pages/KnowledgeBaseDetailPage';
+import DashboardPage from './pages/DashboardPage';
 
 function App() {
   return (
@@ -22,7 +23,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route element={<MainLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/protected" element={<ProtectedPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/users" element={<UserManagementPage />} />
@@ -42,11 +43,6 @@ function App() {
   );
 }
 
-const Dashboard = () => (
-  <div>
-    <h1 className="text-4xl font-bold">Dashboard</h1>
-    <p>Bem-vindo ao seu painel de controle.</p>
-  </div>
-);
+
 
 export default App;

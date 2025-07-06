@@ -34,9 +34,9 @@ const AuthForm = ({ onSubmit, isRegister }) => {
       <div className="text-center">
         <button
           type="submit"
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-200"
+          className="w-full bg-gradient-to-r from-indigo-500 to-green-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-200"
         >
-          Sign in
+          Entrar
         </button>
       </div>
     </form>

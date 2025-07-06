@@ -1,77 +1,23 @@
-const API_URL = 'http://localhost:3000/api';
+import api from './api';
 
 const createCategory = async (token, categoryData) => {
-  const response = await fetch(`${API_URL}/categories`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify(categoryData),
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao criar categoria');
-  }
-  return data;
+  return api.post('/categories', token, categoryData);
 };
 
 const getAllCategories = async (token) => {
-  const response = await fetch(`${API_URL}/categories`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao buscar categorias');
-  }
-  return data;
+  return api.get('/categories', token);
 };
 
 const getCategoryById = async (token, id) => {
-  const response = await fetch(`${API_URL}/categories/${id}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao buscar categoria por ID');
-  }
-  return data;
+  return api.get(`/categories/${id}`, token);
 };
 
 const updateCategory = async (token, id, updateData) => {
-  const response = await fetch(`${API_URL}/categories/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify(updateData),
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao atualizar categoria');
-  }
-  return data;
+  return api.put(`/categories/${id}`, token, updateData);
 };
 
 const deleteCategory = async (token, id) => {
-  const response = await fetch(`${API_URL}/categories/${id}`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao deletar categoria');
-  }
-  return data;
+  return api.delete(`/categories/${id}`, token);
 };
 
 export default {
